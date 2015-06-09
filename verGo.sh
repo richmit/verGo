@@ -19,9 +19,13 @@
 #                  One could also do something like this: #!/home/richmit/bin/verGo.sh -app ruby
 #
 #            Configuration is provided via the ~/.verGoRC file.  The file format is simple.  It is line oriented.  The fist word on
-#            the line is the "application", and the following items are places to find that application.  They can be other
-#            "applications" listed in the config file, or fully qualified path names .
+#            the line is the "application", this is optionally followed by a !, and the following items are places to find that
+#            application.  The "!" means the application can be wrapped with rlwrap.  They can be other "applications" listed in the
+#            config file, or fully qualified path names .
 #            
+#            The rlwrap thing doesn't work for indirect calls -- i.e. if the config file has references to other app lines.  I'll
+#            fix this someday.
+#
 
 ##----------------------------------------------------------------------------------------------------------------------------------
 
@@ -30,14 +34,21 @@ DOERRORS=YES
 RUNMODE=YES
 DEBUG=NO
 PRTCMD=NO
+if [ -t 1 ] ;
+then
+    APPINT=YES
+else
+    APPINT=NO
+fi
 while [ -z "$HAVEMORE" ] ; do
     case "$1" in
-        -noRun    ) RUNMODE=NO; DOERRORS=NO;      shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noRun"    ; fi ;;
-        -app      ) APPNAME=$2;                   shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -app"      ; fi ;;
-        -prtCmd   ) PRTCMD=YES;                   shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -prtCmd"   ; fi ;;
-        -noErrors ) DOERRORS=NO;                  shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noErrors" ; fi ;;
-        -debug    ) DEBUG=YES;                    shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -debug"    ; fi ;;
-        *         ) HAVEMORE='NOPE';                                                                                                          ;;
+        -noRun       ) RUNMODE=NO; DOERRORS=NO;      shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noRun"        ; fi ;;
+        -app         ) APPNAME=$2;                   shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -app $APPNAME" ; fi ;;
+        -rlwrap      ) APPINT=$2;                    shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -i $APPINT"    ; fi ;;
+        -prtCmd      ) PRTCMD=YES;                   shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -prtCmd"       ; fi ;;
+        -noErrors    ) DOERRORS=NO;                  shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noErrors"     ; fi ;;
+        -debug       ) DEBUG=YES;                    shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -debug"        ; fi ;;
+        *            ) HAVEMORE='NOPE';                                                                                                              ;;
     esac
 done
 
@@ -55,11 +66,33 @@ if [ "$APPN" = 'verGo.sh' ] ; then
 fi
 
 APPI=`grep "^$APPN " ~/.verGoRC`
-APPP=`echo $APPI | sed "s/^$APPN //"`
 
-if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Application name:  $APPN" ; fi
-if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Application info:  $APPN" ; fi
-if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Application paths: $APPP" ; fi
+if echo $APPI | egrep "^$APPN i " 2>/dev/null 1>/dev/null ; then
+    APPP=`echo $APPI | sed "s/^$APPN i //"`
+    RLWA='YES'
+    RLWP=`verGo.sh -prtCmd -noRun rlwrap`
+else
+    APPP=`echo $APPI | sed "s/^$APPN //"`
+    RLWA='NO'
+    RLWP=''
+fi
+
+DORL=NO
+if [ -n "$RLWP" ] ; then
+    if [ "$APPINT" = "YES" ] ; then
+        if [ "$RLWA" = "YES" ] ; then
+            DORL=YES
+        fi
+    fi
+fi
+
+if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Application name:      $APPN"   ; fi
+if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Application info:      $APPN"   ; fi
+if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Application paths:     $APPP"   ; fi
+if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Application wrapable:  $RLWA"   ; fi
+if [ "$DEBUG" = 'YES' ] ; then echo "INFO: rlwrap requested:      $APPINT" ; fi
+if [ "$DEBUG" = 'YES' ] ; then echo "INFO: rlwrap path:           $RLWP"   ; fi
+if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Use rlwrap:            $DORL"   ; fi
 
 if [ -z "$APPP" ] ; then
     if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application not supported: $APPN"; fi
@@ -73,13 +106,17 @@ else
         fi
         if [ -x "$CBINPOS" ] ; then
             if [ "$DEBUG"   = 'YES' ] ; then echo "INFO: Application found: $CBINPOS" ; fi
-            if [ "$RUNMODE" = 'YES' ] ; then exec "$CBINPOS" "$@"; fi
-            if [ "$PRTCMD"  = 'YES' ] ; then echo "$CBINPOS"     ; fi
+            if [ "$PRTCMD"  = 'YES' ] ; then echo "$CBINPOS" ; fi
+            if [ "$RUNMODE" = 'YES' ] ; then
+                if [ "$DORL" = "YES" ] ; then
+                    exec "$RLWP" -C "$APPN" "$CBINPOS" "$@"
+                else
+                    exec "$CBINPOS" "$@"
+                fi
+            fi
             exit
         fi
     done
     if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application not found: $APPN"; fi
     exit
 fi
-
-
