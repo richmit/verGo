@@ -3,7 +3,7 @@
 
 ####################################################################################################################################
 # @file      verGo.sh
-# @author    Mitch Richling <http://www.mitchr.me>
+# @author    Mitch Richling <https://www.mitchr.me>
 # @Copyright Copyright 2013 by Mitch Richling.  All rights reserved.
 # @brief     Find and run applications.@EOL
 # @Keywords  
