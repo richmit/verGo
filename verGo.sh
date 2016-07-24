@@ -1,33 +1,51 @@
 #!/bin/bash
-# -*- Mode:Shell-script; Coding:utf-8; fill-column:132 -*-
-
-####################################################################################################################################
+# -*- Mode:Shell-script; Coding:us-ascii-unix; fill-column:158 -*-
+################################################################################################################################################################
+##
 # @file      verGo.sh
 # @author    Mitch Richling <https://www.mitchr.me>
-# @Copyright Copyright 2013 by Mitch Richling.  All rights reserved.
 # @brief     Find and run applications.@EOL
-# @Keywords  
-# @Std       bash
+# @std       bash
+# @copyright 
+#  @parblock
+#  Copyright (c) 1993,1996,1997,2005,2011,2016, Mitchell Jay Richling <https://www.mitchr.me> All rights reserved.
 #
-#            Provides a way to find preferred versions of various applications.  Three modes of operation are provided:
-#               1) Run verGo.sh with the -app argument to specify the application name.
-#               2) Create a link to verGo.sh.  The name of the link will be used as the "application" name
-#               3) Use it on a SHBANG line like so: #!/bin/bash /home/richmit/bin/ruby
-#                     * On BSD: #!/bin/bash /home/richmit/bin/ruby
-#                     * On Linux: #!/home/richmit/bin/verGo.sh ruby
-#                  The first non-recognized argument on the command line will be used as the "application" name.
+#  Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 #
-#            Configuration is provided via the ~/.verGoRC file.  The file format is simple.  It is line oriented.  The fist word on
-#            the line is the "application", this is optionally followed by a !, and the following items are places to find that
-#            application.  The "!" means the application can be wrapped with rlwrap.  They can be other "applications" listed in the
-#            config file, or fully qualified path names .
-#            
-#            The rlwrap thing doesn't work for indirect calls -- i.e. if the config file has references to other app lines.  I'll
-#            fix this someday.
+#  1. Redistributions of source code must retain the above copyright notice, this list of conditions, and the following disclaimer.
 #
+#  2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions, and the following disclaimer in the documentation
+#     and/or other materials provided with the distribution.
+#
+#  3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without
+#     specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+#  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+#  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#  @endparblock
+# @filedetails
+#
+#  Provides a way to find preferred versions of various applications.  Three modes of operation are provided:
+#     1) Run verGo.sh with the -app argument to specify the application name.
+#     2) Create a link to verGo.sh.  The name of the link will be used as the "application" name
+#     3) Use it on a SHBANG line like so (works on BSDs and Linux): 
+#           #!/bin/bash /home/richmit/bin/ruby
+#        On Linux you can use the above, or simplify it to:
+#           #!/home/richmit/bin/verGo.sh ruby
+#        The first non-recognized argument on the command line will be used as the "application" name.
+#
+#  Configuration is provided via the ~/.verGoRC file.  The file format is simple.  It is line oriented.  The fist word on the line is the "application", this
+#  is optionally followed by a !, and the following items are places to find that application.  The "!"  means the application can be wrapped with rlwrap.
+#  They can be other "applications" listed in the config file, or fully qualified path names .
+#  
+#  The rlwrap thing doesn't work for indirect calls -- i.e. if the config file has references to other app lines.  I'll fix this someday.
+#
+################################################################################################################################################################
 
-##----------------------------------------------------------------------------------------------------------------------------------
-
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
 APPNAME=''
 DOERRORS=YES
 RUNMODE=YES
