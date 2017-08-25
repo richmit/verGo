@@ -37,6 +37,10 @@
 #           #!/home/richmit/bin/verGo.sh ruby
 #        The first non-recognized argument on the command line will be used as the "application" name.
 #
+# Run verGo.sh with the -app and -noRun, and exit status will be: 0) app found, 1) app not supported, 2) app supported but not found
+#
+# Run verGo.sh with the -app, -noRun, -prtCmd to print the command that would be run.
+#
 #  Configuration is provided via the ~/.verGoRC file.  The file format is simple.  It is line oriented.  The fist word on the line is the "application", this
 #  is optionally followed by a !, and the following items are places to find that application.  The "!"  means the application can be wrapped with rlwrap.
 #  They can be other "applications" listed in the config file, or fully qualified path names .
@@ -127,7 +131,7 @@ if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Use rlwrap:             $DORL"   ; fi
 
 if [ -z "$APPP" ] ; then
     if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application not supported: $APPN"; fi
-    exit
+    exit 1
 else
     for BINPOS in $APPP; do
         if [ ${BINPOS:0:1} != '/' ] ; then
@@ -145,9 +149,9 @@ else
                     exec "$CBINPOS" "$@"
                 fi
             fi
-            exit
+            exit 0
         fi
     done
     if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application not found: $APPN"; fi
-    exit
+    exit 2
 fi
