@@ -55,69 +55,84 @@ DOERRORS=YES
 RUNMODE=YES
 DEBUG=NO
 PRTCMD=NO
+VERGOLOC=''
 if [ -t 1 ] ;
 then
-    APPINT=YES
+  APPINT=YES
 else
-    APPINT=NO
+  APPINT=NO
 fi
 while [ -z "$HAVEMORE" ] ; do
-    case "$1" in
-        -noRun       ) RUNMODE=NO; DOERRORS=NO;      shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noRun"        ; fi ;;
-        -app         ) APPNAME=$2;                   shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -app $APPNAME" ; fi ;;
-        -rlwrap      ) APPINT=$2;                    shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -i $APPINT"    ; fi ;;
-        -prtCmd      ) PRTCMD=YES;                   shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -prtCmd"       ; fi ;;
-        -noErrors    ) DOERRORS=NO;                  shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noErrors"     ; fi ;;
-        -debug       ) DEBUG=YES;                    shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -debug"        ; fi ;;
-        *            ) HAVEMORE='NOPE';                                                                                                              ;;
-    esac
+  case "$1" in
+    -noRun       ) RUNMODE=NO; DOERRORS=NO;      shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noRun"        ; fi ;;
+    -app         ) APPNAME=$2;                   shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -app $APPNAME" ; fi ;;
+    -rlwrap      ) APPINT=$2;                    shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -i $APPINT"    ; fi ;;
+    -prtCmd      ) PRTCMD=YES;                   shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -prtCmd"       ; fi ;;
+    -noErrors    ) DOERRORS=NO;                  shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noErrors"     ; fi ;;
+    -debug       ) DEBUG=YES;                    shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -debug"        ; fi ;;
+    *            ) HAVEMORE='NOPE';                                                                                                              ;;
+  esac
 done
 
 if [ -z "$APPNAME" ] ; then
-    APPN=`basename $0`
+  APPN=`basename $0`
 else
-    if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Application name provided on command line" ; fi
-    APPN="$APPNAME"
+  if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Application name provided on command line" ; fi
+  APPN="$APPNAME"
 fi
 
 if [ "$APPN" = 'verGo.sh' ] ; then
-    APPN="$1"
-    shift
-    if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Running in SHBANG mode!"; fi
+  APPN="$1"
+  shift
+  if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Running in SHBANG mode!"; fi
+fi
+
+VERGOLOC=''
+for f in "$HOME" "/Users/$USER" '/home/richmit' '/Users/richmit' ; do 
+  if [ -e "$f/bin/verGo.sh" ] ; then
+    VERGOLOC="$f/bin/verGo.sh"
+    break
+  fi
+done
+
+if [ -z "$VERGOLOC" ] ; then  
+  if [ "$DEBUG" = 'YES' ] ; then echo "INFO: verGo.sh location: not found!"; fi
+else
+  if [ "$DEBUG" = 'YES' ] ; then echo "INFO: verGo.sh location: $VERGOLOC"; fi
 fi
 
 APPI=`grep "^$APPN " ~/.verGoRC`
 
 if echo $APPI | egrep "^$APPN i(-| )" 2>/dev/null 1>/dev/null ; then
-    if echo $APPI | egrep "^$APPN i " 2>/dev/null 1>/dev/null ; then
-        if [ "$DEBUG" = 'YES' ] ; then echo "INFO: rlwrap: YES!"; fi
-        APPP=`echo $APPI | sed "s/^$APPN i //"`
-        RLWM='YES'
-        RLWP=`verGo.sh -prtCmd -noRun rlwrap`
-        RLWC="$APPN"
-    else
-        if [ "$DEBUG" = 'YES' ] ; then echo "INFO: rlwrap: YES with command name!"; fi
-        APPP=`echo $APPI | sed "s/^$APPN i-[a-zA-Z]* //"`
-        RLWM='YES'
-        RLWP=`verGo.sh -prtCmd -noRun rlwrap`
-        RLWC=`echo $APPI | sed "s/^$APPN i-//" | sed 's/ .*$//'`
-    fi    
+  if echo $APPI | egrep "^$APPN i " 2>/dev/null 1>/dev/null ; then
+    if [ "$DEBUG" = 'YES' ] ; then echo "INFO: rlwrap: YES!"; fi
+    APPP=`echo $APPI | sed "s/^$APPN i //"`
+    RLWM='YES'
+    RLWP=`verGo.sh -prtCmd -noRun rlwrap`
+    RLWC="$APPN"
+  else
+    if [ "$DEBUG" = 'YES' ] ; then echo "INFO: rlwrap: YES with command name!"; fi
+    APPP=`echo $APPI | sed "s/^$APPN i-[a-zA-Z]* //"`
+    RLWM='YES'
+    RLWP=`verGo.sh -prtCmd -noRun rlwrap`
+    RLWC=`echo $APPI | sed "s/^$APPN i-//" | sed 's/ .*$//'`
+  fi
 else
-    if [ "$DEBUG" = 'YES' ] ; then echo "INFO: rlwrap: NO!"; fi
-    APPP=`echo $APPI | sed "s/^$APPN //"`
-    RLWM='NO'
-    RLWP=''
-    RLWA=''
-    RLWC=''
+  if [ "$DEBUG" = 'YES' ] ; then echo "INFO: rlwrap: NO!"; fi
+  APPP=`echo $APPI | sed "s/^$APPN //"`
+  RLWM='NO'
+  RLWP=''
+  RLWA=''
+  RLWC=''
 fi
 
 DORL=NO
 if [ -n "$RLWP" ] ; then
-    if [ "$APPINT" = "YES" ] ; then
-        if [ "$RLWM" = "YES" ] ; then
-            DORL=YES
-        fi
+  if [ "$APPINT" = "YES" ] ; then
+    if [ "$RLWM" = "YES" ] ; then
+      DORL=YES
     fi
+  fi
 fi
 
 if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Application name:       $APPN"   ; fi
@@ -130,28 +145,34 @@ if [ "$DEBUG" = 'YES' ] ; then echo "INFO: rlwrap command name:    $RLWC"   ; fi
 if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Use rlwrap:             $DORL"   ; fi
 
 if [ -z "$APPP" ] ; then
-    if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application not supported: $APPN"; fi
-    exit 1
+  if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application not supported: $APPN"; fi
+  exit 1
 else
-    for BINPOS in $APPP; do
-        if [ ${BINPOS:0:1} != '/' ] ; then
-            CBINPOS=`/home/richmit/bin/verGo.sh -app $BINPOS -noRun -prtCmd`
+  IFS=$'\n'
+  for BINPOS in `echo $APPP | xargs -n 1 echo`; do # Krazy thing we do to support quoted paths
+    if [ ${BINPOS:0:1} != '/' ] ; then
+      if [ -z "$VERGOLOC" ] ; then
+        echo "WARNING: Recursive definition ignored: $BINPOS!";
+        CBINPOS=''
+      else
+        CBINPOS=`$VERGOLOC -app $BINPOS -noRun -prtCmd`
+      fi
+    else
+      CBINPOS="$BINPOS"
+    fi
+    if [ -e "$CBINPOS" ] ; then
+      if [ "$DEBUG"   = 'YES' ] ; then echo "INFO: Application found: $CBINPOS" ; fi
+      if [ "$PRTCMD"  = 'YES' ] ; then echo "$CBINPOS" ; fi
+      if [ "$RUNMODE" = 'YES' ] ; then
+        if [ "$DORL" = "YES" ] ; then
+          exec "$RLWP" -C "$RLWC" "$CBINPOS" "$@"
         else
-            CBINPOS="$BINPOS"
+          exec "$CBINPOS" "$@"
         fi
-        if [ -x "$CBINPOS" ] ; then
-            if [ "$DEBUG"   = 'YES' ] ; then echo "INFO: Application found: $CBINPOS" ; fi
-            if [ "$PRTCMD"  = 'YES' ] ; then echo "$CBINPOS" ; fi
-            if [ "$RUNMODE" = 'YES' ] ; then
-                if [ "$DORL" = "YES" ] ; then
-                    exec "$RLWP" -C "$RLWC" "$CBINPOS" "$@"
-                else
-                    exec "$CBINPOS" "$@"
-                fi
-            fi
-            exit 0
-        fi
-    done
-    if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application not found: $APPN"; fi
-    exit 2
+      fi
+      exit 0
+    fi
+  done
+  if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application not found: $APPN"; fi
+  exit 2
 fi
