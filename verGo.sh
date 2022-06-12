@@ -5,7 +5,7 @@
 # @file      verGo.sh
 # @author    Mitch Richling <https://www.mitchr.me>
 # @brief     Find and run applications.@EOL
-# @std       bash
+# @std       bash_3
 # @copyright 
 #  @parblock
 #  Copyright (c) 1993,1996,1997,2005,2011,2016, Mitchell Jay Richling <https://www.mitchr.me> All rights reserved.
@@ -28,151 +28,263 @@
 #  @endparblock
 # @filedetails
 #
-#  Provides a way to find preferred versions of various applications.  Three modes of operation are provided:
-#     1) Run verGo.sh with the -app argument to specify the application name.
-#     2) Create a link to verGo.sh.  The name of the link will be used as the "application" name
-#     3) Use it on a SHBANG line like so (works on BSDs and Linux): 
-#           #!/bin/bash /home/richmit/bin/ruby
-#        On Linux you can use the above, or simplify it to:
+#  Provides a way to find preferred versions of various applications.  
+#     1) Create a link to verGo.sh.  The name of the link will be used as the "application" name
+#     2) Run verGo.sh with the -app argument to specify the application name.
+#     3) Run verGo.sh with the application name after any verGo.sh options. On Linux, this mode can be used for SHBANG lines:
 #           #!/home/richmit/bin/verGo.sh ruby
-#        The first non-recognized argument on the command line will be used as the "application" name.
+#     4) On some platforms (BSDs for example) SHBANG lines require a binary, so you can use verGo.sh this way:
+#           #!/bin/bash /home/richmit/bin/ruby
 #
-# Run verGo.sh with the -app and -noRun, and exit status will be: 0) app found, 1) app not supported, 2) app supported but not found
+#  Command line options:
+#    -noRun .......... Don't actually run the application
+#    -app APP_NAME ... Name of the application to run
+#    -wrap <YES|NO> .. Enable or disable rlwrap & winpty
+#    -prtCmd ......... Print the command we find
+#    -noErrors ....... Don't print errors -- still, exit, just don't print anything
+#    -rcfile <FILE> .. Use this RC file instead of ~/.verGoRC
+#    -debug .......... Enable debugging
 #
-# Run verGo.sh with the -app, -noRun, -prtCmd to print the command that would be run.
+#  Exit Codes
+#    - exit 6 ERROR: No application name provided!
+#    - exit 5 ERROR: rcfile not found!
+#    - exit 4 ERROR: Duplicate app found in rcfile
+#    - exit 3 ERROR: Application not supported
+#    - exit 2 ERROR: Application supported, but no executable found
+#    - exit 1 ERROR: Application supported, executable found, failed to exec
+#    - exit 0 Application found in -noRun mode
 #
-#  Configuration is provided via the ~/.verGoRC file.  The file format is simple.  It is line oriented.  The fist word on the line is the "application", this
-#  is optionally followed by a !, and the following items are places to find that application.  The "!"  means the application can be wrapped with rlwrap.
-#  They can be other "applications" listed in the config file, or fully qualified path names .
-#  
-#  The rlwrap thing doesn't work for indirect calls -- i.e. if the config file has references to other app lines.  I'll fix this someday.
+#  Recipes:
+#    - To just see if verGo.sh knows about an application: Use the -app and -noRun options.
+#    - To just print the command binary that would be executed: Use the -app, -noRun, and -prtCmd options.
+#
+#  Configuration file
+#    The default configuration file is ~/.verGoRC.  This may be overridden via the -rcfile option.  
+#    A simple line oriented format is used with each line looking like:
+#        APP_NAME [-r HIST_NAME|-w] [VARIABLES] : ALTERNATIVES
+#    Syntax rules:
+#      - The APP_NAME is the name of the application and may not contain whitespace
+#      - When present, the HIST_NAME, must not contain whitespace
+#      - Outside of single quoted entities, all whitespace consists of SINGLE SPACES.
+#      - VARIABLES is a single space separated list of variable definitions of the form FOO=BAR
+#        Definitions may be single quoted if the value contains spaces: 'FOO=BAR BAR'
+#      - ALTERNATIVES is a single space separated list of fully qualified paths or APP_NAMEs.
+#        Path names may be single quoted if they contain spaces: '/path/with spaces/foo.exe'
 #
 ################################################################################################################################################################
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------
-APPNAME=''
-DOERRORS=YES
-RUNMODE=YES
-DEBUG=NO
-PRTCMD=NO
-VERGOLOC=''
-if [ -t 1 ] ;
-then
-  APPINT=YES
-else
-  APPINT=NO
+DEBUG='NO'
+if [ -n "$VERGODEBUG" ]; then
+   DEBUG='YES'
+   if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: Debug enabled via VERGODEBUG environment variable"; fi
 fi
+APPNAME=''
+DOERRORS='YES'
+RUNMODE='YES'
+PRTCMD='NO'
+RCFILE=~/.verGoRC
+DOWRAP='YES'
 while [ -z "$HAVEMORE" ] ; do
   case "$1" in
-    -noRun       ) RUNMODE=NO; DOERRORS=NO;      shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noRun"        ; fi ;;
-    -app         ) APPNAME=$2;                   shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -app $APPNAME" ; fi ;;
-    -rlwrap      ) APPINT=$2;                    shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -i $APPINT"    ; fi ;;
-    -prtCmd      ) PRTCMD=YES;                   shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -prtCmd"       ; fi ;;
-    -noErrors    ) DOERRORS=NO;                  shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noErrors"     ; fi ;;
-    -debug       ) DEBUG=YES;                    shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -debug"        ; fi ;;
+    -noRun       ) RUNMODE=NO; DOERRORS=NO;      shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noRun"           ; fi ;;
+    -app         ) APPNAME=$2;                   shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -app $APPNAME"    ; fi ;;
+    -wrap        ) DOWRAP=$2;                    shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -wrap $DOWRAP"    ; fi ;;
+    -prtCmd      ) PRTCMD=YES;                   shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -prtCmd"          ; fi ;;
+    -noErrors    ) DOERRORS=NO;                  shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noErrors"        ; fi ;;
+    -rcfile      ) RCFILE=$2;                    shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -rcfile $RCFILE"  ; fi ;;
+    -debug       ) DEBUG=YES;                    shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -debug"           ; fi ;;
     *            ) HAVEMORE='NOPE';                                                                                                              ;;
   esac
 done
 
 if [ -z "$APPNAME" ] ; then
-  APPN=`basename $0`
+  APPNAME=`/usr/bin/basename $0`
 else
-  if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Application name provided on command line" ; fi
-  APPN="$APPNAME"
+  if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: Application name provided on command line" ; fi
 fi
 
-if [ "$APPN" = 'verGo.sh' ] ; then
-  APPN="$1"
+if [ "$APPNAME" = 'verGo.sh' ] ; then
+  APPNAME="$1"
   shift
-  if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Running in SHBANG mode!"; fi
+  if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: Running in SHBANG mode!"; fi
 fi
 
-VERGOLOC=''
-for f in "$HOME" "/Users/$USER" '/home/richmit' '/Users/richmit' ; do 
-  if [ -e "$f/bin/verGo.sh" ] ; then
-    VERGOLOC="$f/bin/verGo.sh"
-    break
-  fi
-done
+if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: APPNAME  = $APPNAME "; fi
+if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: DOERRORS = $DOERRORS"; fi
+if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: RUNMODE  = $RUNMODE "; fi
+if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: DEBUG    = $DEBUG   "; fi
+if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: PRTCMD   = $PRTCMD  "; fi
+if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: RCFILE   = $RCFILE  "; fi
+if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: DOWRAP   = $DOWRAP  "; fi
 
-if [ -z "$VERGOLOC" ] ; then  
-  if [ "$DEBUG" = 'YES' ] ; then echo "INFO: verGo.sh location: not found!"; fi
-else
-  if [ "$DEBUG" = 'YES' ] ; then echo "INFO: verGo.sh location: $VERGOLOC"; fi
+if [ -z "$APPNAME" ]; then
+  if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: No application name provided!"; fi
+  exit 6
 fi
 
-APPI=`grep "^$APPN " ~/.verGoRC`
-
-if echo $APPI | egrep "^$APPN i(-| )" 2>/dev/null 1>/dev/null ; then
-  if echo $APPI | egrep "^$APPN i " 2>/dev/null 1>/dev/null ; then
-    if [ "$DEBUG" = 'YES' ] ; then echo "INFO: rlwrap: YES!"; fi
-    APPP=`echo $APPI | sed "s/^$APPN i //"`
-    RLWM='YES'
-    RLWP=`verGo.sh -prtCmd -noRun rlwrap`
-    RLWC="$APPN"
-  else
-    if [ "$DEBUG" = 'YES' ] ; then echo "INFO: rlwrap: YES with command name!"; fi
-    APPP=`echo $APPI | sed "s/^$APPN i-[a-zA-Z]* //"`
-    RLWM='YES'
-    RLWP=`verGo.sh -prtCmd -noRun rlwrap`
-    RLWC=`echo $APPI | sed "s/^$APPN i-//" | sed 's/ .*$//'`
-  fi
-else
-  if [ "$DEBUG" = 'YES' ] ; then echo "INFO: rlwrap: NO!"; fi
-  APPP=`echo $APPI | sed "s/^$APPN //"`
-  RLWM='NO'
-  RLWP=''
-  RLWA=''
-  RLWC=''
+if [ ! -e "$RCFILE" ] ; then
+  if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: $RCFILE not found!"; fi
+  exit 5
 fi
 
-DORL=NO
-if [ -n "$RLWP" ] ; then
-  if [ "$APPINT" = "YES" ] ; then
-    if [ "$RLWM" = "YES" ] ; then
-      DORL=YES
-    fi
-  fi
-fi
-
-if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Application name:       $APPN"   ; fi
-if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Application info:       $APPN"   ; fi
-if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Application paths:      $APPP"   ; fi
-if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Application rlwrapable: $RLWM"   ; fi
-if [ "$DEBUG" = 'YES' ] ; then echo "INFO: rlwrap requested:       $APPINT" ; fi
-if [ "$DEBUG" = 'YES' ] ; then echo "INFO: rlwrap path:            $RLWP"   ; fi
-if [ "$DEBUG" = 'YES' ] ; then echo "INFO: rlwrap command name:    $RLWC"   ; fi
-if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Use rlwrap:             $DORL"   ; fi
-
-if [ -z "$APPP" ] ; then
-  if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application not supported: $APPN"; fi
-  exit 1
-else
-  IFS=$'\n'
-  for BINPOS in `echo $APPP | xargs -n 1 echo`; do # Krazy thing we do to support quoted paths
-    if [ ${BINPOS:0:1} != '/' ] ; then
-      if [ -z "$VERGOLOC" ] ; then
-        echo "WARNING: Recursive definition ignored: $BINPOS!";
-        CBINPOS=''
-      else
-        CBINPOS=`$VERGOLOC -app $BINPOS -noRun -prtCmd`
-      fi
-    else
-      CBINPOS="$BINPOS"
-    fi
-    if [ -e "$CBINPOS" ] ; then
-      if [ "$DEBUG"   = 'YES' ] ; then echo "INFO: Application found: $CBINPOS" ; fi
-      if [ "$PRTCMD"  = 'YES' ] ; then echo "$CBINPOS" ; fi
-      if [ "$RUNMODE" = 'YES' ] ; then
-        if [ "$DORL" = "YES" ] ; then
-          exec "$RLWP" -C "$RLWC" "$CBINPOS" "$@"
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Read in config file.  
+declare -a verGoRCwino
+declare -a verGoRCrlwo
+declare -a verGoRCapps
+declare -a verGoRCvars
+declare -a verGoRClist
+while IFS= read -r line; do
+  if [ -n "$line" ]; then
+    if [[ "$line" != '#'* ]]; then
+      if [[ "$line" == *' : '* ]]; then
+        listbit=${line#* : }
+        varbit=${line%% : *}
+        appbit=${varbit%% *}
+        if [[ "$varbit" == *' '* ]]; then
+          varbit=${varbit#* }
         else
-          exec "$CBINPOS" "$@"
+          varbit=''
         fi
+        for oapp in ${verGoRCapps[@]}; do
+          if [ "$oapp" == "$appbit" ]; then
+            if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Duplicate app in $RCFILE: $appbit"; fi
+            exit 4
+          fi
+        done 
+        winbit='NO'
+        if [[ "$varbit" == '-w'* ]]; then
+          winbit='YES'
+          varbit=${varbit#-w}
+          varbit=${varbit# }
+        fi
+        rlwbit=''
+        if [[ "$varbit" == '-r'* ]]; then
+          varbit=${varbit#-r }
+          rlwbit=${varbit%% *}
+          varbit=${varbit#* }
+        fi
+        verGoRCrlwo+=("$rlwbit")
+        verGoRCwino+=("$winbit")
+        verGoRCapps+=("$appbit")
+        verGoRCvars+=("$varbit")
+        verGoRClist+=("$listbit")
       fi
-      exit 0
+    fi
+  fi
+done < "$RCFILE"
+
+# for verGoRCIdx in "${!verGoRCapps[@]}"; do
+#   echo "IDX: $verGoRCIdx "
+#   echo "     app: =>${verGoRCapps[$verGoRCIdx]}<="
+#   echo "     win: =>${verGoRCwino[$verGoRCIdx]}<="
+#   echo "     rwl: =>${verGoRCrlwo[$verGoRCIdx]}<="
+#   echo "     var: =>${verGoRCvars[$verGoRCIdx]}<="
+#   echo "     alt: =>${verGoRClist[$verGoRCIdx]}<="
+# done
+
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
+function findAppIdx {
+  IFS=
+  for faii in "${!verGoRCapps[@]}"; do
+    if [ "$1" == ${verGoRCapps[faii]} ]; then
+      echo $faii
+      return 0
     fi
   done
-  if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application not found: $APPN"; fi
-  exit 2
+  echo ''
+  return 1
+}
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
+function findAppBin {
+  IFS=
+  for fabi in "${!verGoRCapps[@]}"; do
+    if [ "$1" == ${verGoRCapps[fabi]} ]; then
+      IFS=$'\n'
+      for fabbp in `echo ${verGoRClist[fabi]} | /usr/bin/xargs -n 1 /usr/bin/echo`; do # Krazy thing we do to support quoted paths
+        local fabcbp="$fabbp"
+        if [ ${fabbp:0:1} != '/' ] ; then
+          fabcbp=$(findAppBin "$fabbp")
+          if [ -n "$fabcbp" ]; then
+            echo "$fabcbp"
+            return 0
+          fi
+        else
+          if [ -e "$fabcbp" ] ; then
+            echo "$fabi $fabcbp"
+            return 0
+          fi
+        fi
+      done
+    fi
+  done
+  echo ''
+  return 1
+}
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------
+if [ -z "$(findAppIdx "$APPNAME")" ]; then
+  if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application not supported: $APPNAME"; fi
+  exit 3
+else
+  SRES=$(findAppBin "$APPNAME")
+  if [ -z "$SRES" ]; then
+    if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application supported, but no executable found: $APPNAME"; fi
+    exit 2
+  else
+    verGoIdx=${SRES%% *}
+    verGoBin=${SRES#* }
+    if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application found:      $verGoBin" ; fi
+    if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application final app:  ${verGoRCapps[$verGoIdx]}" ; fi
+    if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application variables:  ${verGoRCvars[$verGoIdx]}" ; fi
+    if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application rlwrap opt: '${verGoRCrlwo[$verGoIdx]}'" ; fi
+    if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application winpty opt: ${verGoRCwino[$verGoIdx]}" ; fi
+    if [ "$PRTCMD"  = 'YES' ] ; then echo "$verGoBin" ; fi
+    if [ "$RUNMODE" = 'YES' ] ; then
+      # Create an array with variables -- so we can quote them later for env
+      declare -a verGoVars
+      verGoVars+=("VERGO=$APPNAME")
+      IFS=$'\n'
+      for varset in `echo ${verGoRCvars[$verGoIdx]} | /usr/bin/xargs -n 1 /usr/bin/echo`; do 
+        verGoVars+=("$varset")
+      done
+      IFS=
+      # Figure out path for winpty & rlwrap if required...
+      WINBIN='winpty'
+      RLWBIN='rlwrap'
+      if [ "$DOWRAP" == 'YES' -a "${verGoRCwino[$verGoIdx]}" == 'YES' ]; then
+        SRES=$(findAppBin "winpty")
+        if [ -n "$SRES" ]; then
+          WINBIN=${SRES#* }
+        else
+          if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Could not find winpty in RCFILE" ; fi
+        fi
+      else
+        if [ "$DOWRAP" == 'YES' -a -n "${verGoRCrlwo[$verGoIdx]}" ]; then
+          SRES=$(findAppBin "rlwrap")
+          if [ -n "$SRES" ]; then
+            RLWBIN=${SRES#* }
+          else
+            if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Could not find rlwrap in RCFILE" ; fi
+          fi
+        fi
+      fi
+      # We have everything we need.  Run it...
+      if [ "$DOWRAP" == 'YES' -a "${verGoRCwino[$verGoIdx]}" == 'YES' ]; then
+        exec env "${verGoVars[@]}" "$WINBIN" "$verGoBin" "$@"
+      else
+        if [ "$DOWRAP" == 'YES' -a -n "${verGoRCrlwo[$verGoIdx]}" ]; then
+          exec env "${verGoVars[@]}" "$RLWBIN" -C "${verGoRCrlwo[$verGoIdx]}" "$verGoBin" "$@"
+        else
+          exec env "${verGoVars[@]}" "$verGoBin" "$@"
+        fi
+      fi
+      if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application supported, executable found, failed to exec: $APPNAME"; fi
+      exit 1
+    fi
+    exit 0
+  fi
 fi
