@@ -37,22 +37,27 @@
 #           #!/bin/bash /home/richmit/bin/ruby
 #
 #  Command line options:
-#    -noRun .......... Don't actually run the application
-#    -app APP_NAME ... Name of the application to run
-#    -wrap <YES|NO> .. Enable or disable rlwrap & winpty
-#    -prtCmd ......... Print the command we find
-#    -noErrors ....... Don't print errors -- still, exit, just don't print anything
-#    -rcfile <FILE> .. Use this RC file instead of ~/.verGoRC
-#    -debug .......... Enable debugging
+#    -noRun ................... Don't actually run the application
+#    -app APP_NAME ............ Name of the application to run
+#    -noWrap .................. Enable or disable rlwrap & winpty
+#    -prtCmd .................. Print the command we find
+#    -prtVar .................. Print the variables for the command we find
+#                               Each variable is printed on a separate line
+#                               If -prtCmd & -prtVar are both provided, the command is printed first
+#    -prtFmt <UNIX|WIN|DOS> ... Print format for -prtCmd
+#    -noErrors ................ Don't print errors -- still, exit, just don't print anything
+#    -rcfile <FILE> ........... Use this RC file instead of ~/.verGoRC
+#    -debug ................... Enable debugging
 #
 #  Exit Codes
-#    - exit 6 ERROR: No application name provided!
-#    - exit 5 ERROR: rcfile not found!
-#    - exit 4 ERROR: Duplicate app found in rcfile
-#    - exit 3 ERROR: Application not supported
-#    - exit 2 ERROR: Application supported, but no executable found
-#    - exit 1 ERROR: Application supported, executable found, failed to exec
-#    - exit 0 Application found in -noRun mode
+#    - 7 ERROR: Invalid value for -prtFmt
+#    - 6 ERROR: No application name provided!
+#    - 5 ERROR: rcfile not found!
+#    - 4 ERROR: Duplicate app found in rcfile
+#    - 3 ERROR: Application not supported
+#    - 2 ERROR: Application supported, but no executable found
+#    - 1 ERROR: Application supported, executable found, failed to exec
+#    - 0 Application found in -noRun mode
 #
 #  Recipes:
 #    - To just see if verGo.sh knows about an application: Use the -app and -noRun options.
@@ -79,22 +84,26 @@ if [ -n "$VERGODEBUG" ]; then
    DEBUG='YES'
    if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: Debug enabled via VERGODEBUG environment variable"; fi
 fi
+PRTFMT='UNIX'
 APPNAME=''
 DOERRORS='YES'
 RUNMODE='YES'
 PRTCMD='NO'
+PRTVAR='NO'
 RCFILE=~/.verGoRC
 DOWRAP='YES'
 while [ -z "$HAVEMORE" ] ; do
   case "$1" in
-    -noRun       ) RUNMODE=NO; DOERRORS=NO;      shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noRun"           ; fi ;;
-    -app         ) APPNAME=$2;                   shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -app $APPNAME"    ; fi ;;
-    -wrap        ) DOWRAP=$2;                    shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -wrap $DOWRAP"    ; fi ;;
-    -prtCmd      ) PRTCMD=YES;                   shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -prtCmd"          ; fi ;;
-    -noErrors    ) DOERRORS=NO;                  shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noErrors"        ; fi ;;
-    -rcfile      ) RCFILE=$2;                    shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -rcfile $RCFILE"  ; fi ;;
-    -debug       ) DEBUG=YES;                    shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -debug"           ; fi ;;
-    *            ) HAVEMORE='NOPE';                                                                                                              ;;
+    -noRun    ) RUNMODE='NO'; DOERRORS='NO'; shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noRun"           ; fi ;;
+    -app      ) APPNAME=$2;                  shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -app $APPNAME"    ; fi ;;
+    -noWrap   ) DOWRAP='NO';                 shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noWrap"          ; fi ;;
+    -prtCmd   ) PRTCMD='YES';                shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -prtCmd"          ; fi ;;
+    -prtVar   ) PRTVAR='YES';                shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -prtVar"          ; fi ;;
+    -prtFmt   ) PRTFMT=$2;                   shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -prtFmt $PRTFMT"  ; fi ;;
+    -noErrors ) DOERRORS='NO';               shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noErrors"        ; fi ;;
+    -rcfile   ) RCFILE=$2;                   shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -rcfile $RCFILE"  ; fi ;;
+    -debug    ) DEBUG='YES';                 shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -debug"           ; fi ;;
+    *         ) HAVEMORE='NOPE';                                                                                                            ;;
   esac
 done
 
@@ -115,8 +124,15 @@ if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: DOERRORS = $DOERRORS"; fi
 if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: RUNMODE  = $RUNMODE "; fi
 if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: DEBUG    = $DEBUG   "; fi
 if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: PRTCMD   = $PRTCMD  "; fi
+if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: PRTVAR   = $PRTVAR  "; fi
+if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: PRTFMT   = $PRTFMT  "; fi
 if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: RCFILE   = $RCFILE  "; fi
 if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: DOWRAP   = $DOWRAP  "; fi
+
+if [ "$PRTFMT" != 'UNIX' -a "$PRTFMT" != 'WIN' -a "$PRTFMT" != 'DOS' ]; then
+  if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Invalid value for -prtFmt: $PRTFMT"; fi
+  exit 7
+fi
 
 if [ -z "$APPNAME" ]; then
   if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: No application name provided!"; fi
@@ -242,15 +258,26 @@ else
     if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application variables:  ${verGoRCvars[$verGoIdx]}" ; fi
     if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application rlwrap opt: '${verGoRCrlwo[$verGoIdx]}'" ; fi
     if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application winpty opt: ${verGoRCwino[$verGoIdx]}" ; fi
-    if [ "$PRTCMD"  = 'YES' ] ; then echo "$verGoBin" ; fi
+    if [ "$PRTCMD"  = 'YES' ] ; then 
+      if   [ "$PRTFMT" == 'UNIX' ]; then
+        echo "$verGoBin"
+      elif [ "$PRTFMT" == 'WIN'  ]; then
+        cygpath -w "$verGoBin"
+      elif [ "$PRTFMT" == 'DOS'  ]; then
+        cygpath -d "$verGoBin"
+      fi
+    fi
+    # Create an array with variables -- so we can quote them later for env.  Also print vars if requested.
+    declare -a verGoVars
+    verGoVars+=("VERGO=$APPNAME")
+    IFS=$'\n'
+    for varset in `echo ${verGoRCvars[$verGoIdx]} | /usr/bin/xargs -n 1 /usr/bin/echo`; do 
+      verGoVars+=("$varset")
+      if [ "$PRTVAR" == 'YES' ] ; then 
+        echo "$varset"
+      fi
+    done
     if [ "$RUNMODE" = 'YES' ] ; then
-      # Create an array with variables -- so we can quote them later for env
-      declare -a verGoVars
-      verGoVars+=("VERGO=$APPNAME")
-      IFS=$'\n'
-      for varset in `echo ${verGoRCvars[$verGoIdx]} | /usr/bin/xargs -n 1 /usr/bin/echo`; do 
-        verGoVars+=("$varset")
-      done
       IFS=
       # Figure out path for winpty & rlwrap if required...
       WINBIN='winpty'
@@ -288,3 +315,5 @@ else
     exit 0
   fi
 fi
+
+
