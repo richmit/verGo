@@ -66,15 +66,27 @@
 #  Configuration file
 #    The default configuration file is ~/.verGoRC.  This may be overridden via the -rcfile option.  
 #    A simple line oriented format is used with each line looking like:
-#        APP_NAME [-r HIST_NAME|-w] [VARIABLES] : ALTERNATIVES
+#        [BOOLEAN_EXPR ::: ] APP_NAME [-r HIST_NAME|-w] [VARIABLES] === ALTERNATIVES
 #    Syntax rules:
 #      - The APP_NAME is the name of the application and may not contain whitespace
 #      - When present, the HIST_NAME, must not contain whitespace
-#      - Outside of single quoted entities, all whitespace consists of SINGLE SPACES.
-#      - VARIABLES is a single space separated list of variable definitions of the form FOO=BAR
-#        Definitions may be single quoted if the value contains spaces: 'FOO=BAR BAR'
-#      - ALTERNATIVES is a single space separated list of fully qualified paths or APP_NAMEs.
-#        Path names may be single quoted if they contain spaces: '/path/with spaces/foo.exe'
+#      - VARIABLES is a space separated list of variable definitions of the form FOO=BAR -- may be single quoted
+#        - Example: PATH=/usr/bin 'HOMER_RANGE=/a/path with/spaces in it/'
+#      - ALTERNATIVES is a space separated list of fully qualified paths or APP_NAMEs -- may be single quoted
+#        - Example: /a/path '/path/with spaces/foo.exe' anAppName /another/path
+#      - Note the whitespace in front of and after both operators (":::" and "===")!
+#      - BOOLEAN_EXPR is a shell boolean expression -- something that can be placed between square brackets
+#        - Variables aviable for use in this expression include:
+#          - HOSTNAME ........... Hostname
+#          - OSTYPE ............. OS family name (msys for MSYS2, 
+#          - MACHTYPE ........... Bash built-in for machin hardware type
+#          - HOME ............... Usually set to the user home directory (some systems don't set this)
+#          - PATH ............... The system path
+#          - MJR_LOC ............ Location of system as defined by the existance of a file like ~/mjrLOC-NAME
+#          - $MJR_APPSEY_TIHPC .. We are running on a TIHPC machine with a good /apps/ tree.
+#        - Examples
+#          - "$HOSTNAME" == 'hofud'
+#          - "$OSTYPE" == 'msys' -a "$MACHTYPE" == 'x86_64'
 #
 ################################################################################################################################################################
 
@@ -84,6 +96,7 @@ if [ -n "$VERGODEBUG" ]; then
    DEBUG='YES'
    if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: Debug enabled via VERGODEBUG environment variable"; fi
 fi
+DBGPRS='NO'
 PRTFMT='UNIX'
 APPNAME=''
 DOERRORS='YES'
@@ -144,6 +157,30 @@ if [ ! -e "$RCFILE" ] ; then
   exit 5
 fi
 
+MJR_LOC='UNKNOWN'
+if [ -e ~/.mjrLOC-* ]; then
+  MJR_LOC=$(echo ~/.mjrLOC-*)
+  MJR_LOC=${MJR_LOC#*LOC-}
+fi
+
+MJR_APPSEY_TIHPC='F'
+if [ "$MJR_LOC" == 'TIHPC' ]; then
+  if [ -e /apps/free/emacs ]; then
+    MJR_APPSEY_TIHPC='T'
+  fi
+fi
+
+# MJR_DNSDOMAIN='QUERY'
+# function lookupDNSDOMAIN {  
+#   if [ "$MJR_DNSDOMAIN" == 'QUERY' ]; then
+#     if [ -e /usr/bin/dnsdomainname ]; then
+#       MJR_DNSDOMAIN=$(/usr/bin/dnsdomainname)
+#     else
+#       MJR_DNSDOMAIN='UNKNOWN'
+#     fi
+#   fi
+# }
+
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Read in config file.  
 declare -a verGoRCwino
@@ -154,38 +191,54 @@ declare -a verGoRClist
 while IFS= read -r line; do
   if [ -n "$line" ]; then
     if [[ "$line" != '#'* ]]; then
-      if [[ "$line" == *' : '* ]]; then
-        listbit=${line#* : }
-        varbit=${line%% : *}
-        appbit=${varbit%% *}
-        if [[ "$varbit" == *' '* ]]; then
-          varbit=${varbit#* }
-        else
-          varbit=''
+      if [[ "$line" == *' === '* ]]; then
+        if [ "$DBGPRS" = 'YES' ] ; then echo "LINE: $line"; fi
+        tstbit='-n TRUE'
+        if [[ "$line" == *' ::: '* ]]; then
+          tstbit=${line%% ::: *}
         fi
-        for oapp in ${verGoRCapps[@]}; do
-          if [ "$oapp" == "$appbit" ]; then
-            if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Duplicate app in $RCFILE: $appbit"; fi
-            exit 4
+        if [ "$DBGPRS" = 'YES' ] ; then echo "   tstbit: $tstbit"; fi
+        if eval '[' $tstbit ']' ; then
+          lstbit=${line#* ::: } # Not final value -- app options list
+          varbit=${lstbit%% === *} # Not final value -- options
+          appbit=${varbit%% *}
+          if [ "$DBGPRS" = 'YES' ] ; then echo "   appbit: $appbit"; fi
+          lstbit=${lstbit#* === }
+          if [ "$DBGPRS" = 'YES' ] ; then echo "   lstbit: $lstbit"; fi
+          if [[ "$varbit" == *' '* ]]; then
+            varbit=${varbit#* }
+          else
+            varbit=''
           fi
-        done 
-        winbit='NO'
-        if [[ "$varbit" == '-w'* ]]; then
-          winbit='YES'
-          varbit=${varbit#-w}
-          varbit=${varbit# }
+          for oapp in ${verGoRCapps[@]}; do
+            if [ "$oapp" == "$appbit" ]; then
+              if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Duplicate app in $RCFILE: $appbit"; fi
+              exit 4
+            fi
+          done 
+          winbit='NO'
+          if [[ "$varbit" == '-w'* ]]; then
+            winbit='YES'
+            varbit=${varbit#-w}
+            varbit=${varbit# }
+          fi
+          if [ "$DBGPRS" = 'YES' ] ; then echo "   winbit: $winbit"; fi
+          rlwbit=''
+          if [[ "$varbit" == '-r'* ]]; then
+            varbit=${varbit#-r }
+            rlwbit=${varbit%% *}
+            varbit=${varbit#* }
+          fi
+          if [ "$DBGPRS" = 'YES' ] ; then echo "   rlwbit: $rlwbit"; fi
+          if [ "$DBGPRS" = 'YES' ] ; then echo "   varbit: $varbit"; fi
+          verGoRCrlwo+=("$rlwbit")
+          verGoRCwino+=("$winbit")
+          verGoRCapps+=("$appbit")
+          verGoRCvars+=("$varbit")
+          verGoRClist+=("$lstbit")
+        else
+          if [ "$DBGPRS" = 'YES' ] ; then echo "   ABORTED"; fi
         fi
-        rlwbit=''
-        if [[ "$varbit" == '-r'* ]]; then
-          varbit=${varbit#-r }
-          rlwbit=${varbit%% *}
-          varbit=${varbit#* }
-        fi
-        verGoRCrlwo+=("$rlwbit")
-        verGoRCwino+=("$winbit")
-        verGoRCapps+=("$appbit")
-        verGoRCvars+=("$varbit")
-        verGoRClist+=("$listbit")
       fi
     fi
   fi
@@ -199,7 +252,6 @@ done < "$RCFILE"
 #   echo "     var: =>${verGoRCvars[$verGoRCIdx]}<="
 #   echo "     alt: =>${verGoRClist[$verGoRCIdx]}<="
 # done
-
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------
 function findAppIdx {
@@ -301,7 +353,7 @@ else
       fi
       # We have everything we need.  Run it...
       if [ "$DOWRAP" == 'YES' -a "${verGoRCwino[$verGoIdx]}" == 'YES' ]; then
-        exec env "${verGoVars[@]}" "$WINBIN" "$verGoBin" "$@"
+        echo exec env "${verGoVars[@]}" "$WINBIN" "$verGoBin" "$@"
       else
         if [ "$DOWRAP" == 'YES' -a -n "${verGoRCrlwo[$verGoIdx]}" ]; then
           exec env "${verGoVars[@]}" "$RLWBIN" -C "${verGoRCrlwo[$verGoIdx]}" "$verGoBin" "$@"
