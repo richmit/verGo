@@ -30,6 +30,7 @@
 #
 #  Provides a way to find preferred versions of various applications.  
 #     1) Create a link to verGo.sh.  The name of the link will be used as the "application" name
+#        This allows us to create a personal "bin" directory containing links to verGo.sh specifying various applications we use.
 #     2) Run verGo.sh with the -app argument to specify the application name.
 #     3) Run verGo.sh with the application name after any verGo.sh options. On Linux, this mode can be used for SHBANG lines:
 #           #!/home/richmit/bin/verGo.sh ruby
@@ -76,14 +77,13 @@
 #        - Example: /a/path '/path/with spaces/foo.exe' anAppName /another/path
 #      - Note the whitespace in front of and after both operators (":::" and "===")!
 #      - BOOLEAN_EXPR is a shell boolean expression -- something that can be placed between square brackets
-#        - Variables aviable for use in this expression include:
+#        - Variables available for use in this expression include:
 #          - HOSTNAME ........... Hostname
 #          - OSTYPE ............. OS family name (msys for MSYS2, 
-#          - MACHTYPE ........... Bash built-in for machin hardware type
+#          - MACHTYPE ........... Bash built-in for machine hardware type
 #          - HOME ............... Usually set to the user home directory (some systems don't set this)
 #          - PATH ............... The system path
-#          - MJR_LOC ............ Location of system as defined by the existance of a file like ~/mjrLOC-NAME
-#          - $MJR_APPSEY_TIHPC .. We are running on a TIHPC machine with a good /apps/ tree.
+#          - MJR_LOC ............ Location of system as defined by the existence of a file like ~/mjrLOC-NAME
 #        - Examples
 #          - "$HOSTNAME" == 'hofud'
 #          - "$OSTYPE" == 'msys' -a "$MACHTYPE" == 'x86_64'
@@ -158,16 +158,9 @@ if [ ! -e "$RCFILE" ] ; then
 fi
 
 MJR_LOC='UNKNOWN'
-if [ -e ~/.mjrLOC-* ]; then
-  MJR_LOC=$(echo ~/.mjrLOC-*)
+if [ -e ~/.mjrLOC-*[A-Z] ]; then
+  MJR_LOC=$(echo ~/.mjrLOC-*[A-Z])
   MJR_LOC=${MJR_LOC#*LOC-}
-fi
-
-MJR_APPSEY_TIHPC='F'
-if [ "$MJR_LOC" == 'TIHPC' ]; then
-  if [ -e /apps/free/emacs ]; then
-    MJR_APPSEY_TIHPC='T'
-  fi
 fi
 
 # MJR_DNSDOMAIN='QUERY'
@@ -272,7 +265,7 @@ function findAppBin {
   for fabi in "${!verGoRCapps[@]}"; do
     if [ "$1" == ${verGoRCapps[fabi]} ]; then
       IFS=$'\n'
-      for fabbp in `echo ${verGoRClist[fabi]} | /usr/bin/xargs -n 1 /usr/bin/echo`; do # Krazy thing we do to support quoted paths
+      for fabbp in `echo ${verGoRClist[fabi]} | /usr/bin/xargs -n 1 /bin/echo`; do # Krazy thing we do to support quoted paths
         local fabcbp="$fabbp"
         if [ ${fabbp:0:1} != '/' ] ; then
           fabcbp=$(findAppBin "$fabbp")
@@ -323,7 +316,7 @@ else
     declare -a verGoVars
     verGoVars+=("VERGO=$APPNAME")
     IFS=$'\n'
-    for varset in `echo ${verGoRCvars[$verGoIdx]} | /usr/bin/xargs -n 1 /usr/bin/echo`; do 
+    for varset in `echo ${verGoRCvars[$verGoIdx]} | /usr/bin/xargs -n 1 /bin/echo`; do 
       verGoVars+=("$varset")
       if [ "$PRTVAR" == 'YES' ] ; then 
         echo "$varset"
@@ -353,7 +346,7 @@ else
       fi
       # We have everything we need.  Run it...
       if [ "$DOWRAP" == 'YES' -a "${verGoRCwino[$verGoIdx]}" == 'YES' ]; then
-        echo exec env "${verGoVars[@]}" "$WINBIN" "$verGoBin" "$@"
+        exec env "${verGoVars[@]}" "$WINBIN" "$verGoBin" "$@"
       else
         if [ "$DOWRAP" == 'YES' -a -n "${verGoRCrlwo[$verGoIdx]}" ]; then
           exec env "${verGoVars[@]}" "$RLWBIN" -C "${verGoRCrlwo[$verGoIdx]}" "$verGoBin" "$@"
