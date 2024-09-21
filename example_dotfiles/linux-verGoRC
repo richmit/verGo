@@ -1,0 +1,107 @@
+    
+parallel === /usr/local/bin/gparallel /opt/local/bin/gparallel /usr/bin/gparallel /usr/local/bin/parallel /opt/local/bin/parallel /usr/bin/parallel
+
+matlab === /usr/bin/matlab /usr/local/bin/matlab
+octave === /usr/bin/octave /usr/local/bin/octave
+
+M2 === /usr/bin/M2 /usr/local/bin/M2 /opt/local/bin/M2
+
+curl === /mingw64/bin/curl /usr/local/bin/curl /opt/local/bin/curl /usr/bin/curl
+
+xv === /usr/bin/xv /usr/local/bin/xv
+pqiv === /usr/local/bin/pqiv /usr/bin/pqiv
+display === /usr/local/bin/display /usr/bin/display
+mjrimgview === /usr/bin/nomacs pqiv display xv
+
+acroread === /usr/local/bin/acroread /usr/bin/acroread
+
+xpdf === /usr/local/bin/xpdf /opt/local/bin/xpdf /usr/bin/xpdf
+
+mjrpdfview === /usr/bin/okular /usr/bin/evince xpdf acroread xpdf /usr/bin/open
+
+emacs23 === /usr/bin/emacs23
+emacs24 === /usr/bin/emacs24
+emacs25 === /usr/local/big/emacs-25.2/bin/emacs /mingw64/bin/emacs /usr/bin/emacs25
+
+emacs === emacs25 emacs24 emacs23 /opt/sfw/bin/emacs /opt/SUNWspro/bin/emacs /usr/local/bin/emacs /opt/local/bin/emacs /usr/bin/emacs /bin/emacs
+em === emacs
+
+emacsclient23 === /usr/bin/emacsclient23
+emacsclient24 === /usr/bin/emacsclient24
+emacsclient25 === /usr/local/big/emacs-25.2/bin/emacsclient /usr/bin/emacsclient25
+
+emacsclientxx === /opt/sfw/bin/emacsclient /opt/SUNWspro/bin/emacsclient /usr/local/bin/emacsclient /opt/local/bin/emacsclient /usr/bin/emacsclient /bin/emacsclient
+
+emacsclient === emacsclient emacsclient25 emacsclient24 emacsclient23 emacsclientxx
+
+vim === /usr/local/bin/vim /usr/bin/vim
+vi === vim /usr/bin/vi /usr/local/bin/vi /opt/local/bin/vi
+
+R_bg /usr/local/big/R-3.4.1/bin/R
+R === R_bg /opt/R/bin/R /usr/local/bin/R /usr/bin/R
+
+Rscript_bg /usr/local/big/R-3.4.1/bin/Rscript
+Rscript === Rscript_bg /opt/R/bin/Rscript /usr/local/bin/Rscript /usr/bin/Rscript
+
+iceweasel === /usr/bin/iceweasel /usr/local/bin/iceweasel
+firefox === /opt/sfw/bin/firefox /usr/local/bin/firefox /opt/local/bin/firefox /usr/bin/firefox
+chrome === /usr/bin/google-chrome /usr/local/bin/google-chrome
+chromium === /usr/bin/chromium /usr/local/bin/chromium
+lynx === /opt/local/bin/lynx /usr/local/bin/lynx /usr/bin/lynx
+w3m === /opt/local/bin/w3m /usr/local/bin/w3m /usr/bin/w3m
+tbrowser === lynx w3m
+browser === iceweasel chromium chrome firefox
+
+git === /usr/local/bin/git /usr/bin/git 
+gitk === /usr/local/bin/gitk /usr/bin/gitk
+git-shell /usr/local/bin/git-shell /usr/bin/git-shell
+
+rlwrap === /opt/local/bin/rlwrap /usr/local/bin/rlwrap /usr/bin/rlwrap
+
+python26 === /usr/bin/python2.6 /opt/local/bin/python2.6 /usr/local/bin/python2.6
+python27 === /usr/bin/python2.7 /opt/local/bin/python2.7 /usr/local/bin/python2.7
+python2 === python27 python26 /usr/bin/python2 /opt/local/bin/python2 /usr/local/bin/python2 /mingw64/bin/python2
+
+python === /usr/local/bin/python /usr/bin/python
+
+perl === /usr/local/bin/perl /usr/bin/perl /bin/perl
+
+ruby20 === /usr/local/big/ruby-2.4.1/bin/ruby /mingw64/bin/ruby /usr/bin/ruby2.4 /usr/bin/ruby2.3 /usr/local/bin/ruby-2.2.2 /usr/bin/ruby2.2 /usr/bin/ruby2.1 /usr/bin/ruby2 /usr/local/bin/ruby20
+ruby === ruby20 /usr/local/bin/ruby /opt/local/bin/ruby /usr/bin/ruby
+
+irb20 === /usr/local/big/ruby-2.4.1/bin/irb /mingw64/bin/irb /usr/bin/irb2.4 /usr/bin/irb2.3 /usr/local/bin/irb-2.2.2 /usr/bin/irb2.2 /usr/bin/irb2.1 /usr/bin/irb2 /usr/local/bin/irb20
+irb === irb20 /usr/local/bin/irb /opt/local/bin/irb /usr/bin/irb
+
+gnome-terminal /usr/bin/gnome-terminal
+rxvt-unicode /usr/bin/rxvt-unicode /bin/rxvt-unicode /opt/local/bin/rxvt-unicode /usr/local/bin/rxvt-unicode /opt/sfw/bin/rxvt-unicode /usr/openwin/bin/rxvt-unicode /usr/X11R6/bin/rxvt-unicode /usr/X11/bin/rxvt-unicode /usr/X/bin/rxvt-unicode /usr/local/X11R6/bin/rxvt-unicode /usr/local/X11/bin/rxvt-unicode /usr/local/X/bin/rxvt-unicode
+urxvt === /usr/bin/urxvt /bin/urxvt /opt/local/bin/urxvt /usr/local/bin/urxvt /opt/sfw/bin/urxvt /usr/openwin/bin/urxvt /usr/X11R6/bin/urxvt /usr/X11/bin/urxvt /usr/X/bin/urxvt /usr/local/X11R6/bin/urxvt /usr/local/X11/bin/urxvt /usr/local/X/bin/urxvt
+rxvt-old /usr/bin/rxvt-old /bin/rxvt-old /opt/local/bin/rxvt-old /usr/local/bin/rxvt-old /opt/sfw/bin/rxvt-old /usr/openwin/bin/rxvt-old /usr/X11R6/bin/rxvt-old /usr/X11/bin/rxvt-old /usr/X/bin/rxvt-old /usr/local/X11R6/bin/rxvt-old /usr/local/X11/bin/rxvt-old /usr/local/X/bin/rxvt-old
+rxvt === rxvt-unicode urxvt rxvt-old /usr/bin/rxvt /bin/rxvt /opt/local/bin/rxvt /usr/local/bin/rxvt /opt/sfw/bin/rxvt /usr/openwin/bin/rxvt /usr/X11R6/bin/rxvt /usr/X11/bin/rxvt /usr/X/bin/rxvt /usr/local/X11R6/bin/rxvt /usr/local/X11/bin/rxvt /usr/local/X/bin/rxvt
+xterm === /usr/local/bin/xterm /usr/bin/xterm /bin/xterm /opt/local/bin/xterm /usr/local/bin/xterm /opt/sfw/bin/xterm /usr/openwin/bin/xterm /usr/X11R6/bin/xterm /usr/X11/bin/xterm /usr/X/bin/xterm /usr/local/X11R6/bin/xterm /usr/local/X11/bin/xterm /usr/local/X/bin/xterm /opt/X11/bin/xterm
+xt === xterm gnome-terminal rxvt
+
+vncserver === /opt/local/bin/vncserver /usr/local/bin/vncserver /usr/bin/vncserver
+vncviewer === /opt/local/bin/vncviewer /usr/local/bin/vncviewer /usr/bin/vncviewer
+
+screen === /usr/local/bin/screen /opt/local/bin/screen /usr/bin/screen /bin/screen
+
+sbcl -r lisp === /usr/local/bin/sbcl /usr/local/big/sbcl-1.3.19/bin/sbcl /opt/local/bin/sbcl /home/richmit/s/linux/local/bin/sbcl /usr/bin/sbcl
+clisp -r lisp === /usr/local/bin/clisp /opt/local/bin/clisp /usr/bin/clisp
+ecl -r lisp === /usr/local/bin/ecl /opt/local/bin/ecl /usr/bin/ecl /bin/ecl
+cmucl -r lisp === /usr/local/bin/cmucl /usr/local/bin/cmucl-21a_2015-09 /usr/local/bin/cmucl-20f /usr/local/bin/cmucl-20d /opt/local/bin/cmucl /usr/bin/cmucl
+abcl -r lisp === /usr/local/bin/abcl /opt/local/bin/abcl /usr/bin/abcl
+ccl -r lisp === /usr/local/bin/ccl /usr/local/bin/ccl-1.10 /opt/local/bin/ccl
+
+lisp === sbcl ecl clisp abcl cmucl ccl
+cl === lisp
+
+maxima-5.40.0 /usr/local/big/maxima-5.40.0_sbcl-1.3.19/bin/maxima
+maxima -r maxima === maxima-5.40.0 /opt/local/bin/maxima /usr/local/bin/maxima /usr/bin/maxima /home/richmit/s/linux/bin/maxima
+
+xmaxima-5.40.0 /usr/local/big/maxima-5.40.0_sbcl-1.3.19/bin/xmaxima
+xmaxima-5.40 /usr/local/big/maxima-5.40.0_sbcl-1.3.19/bin/xmaxima
+xmaxima === xmaxima-5.40.0 /opt/local/bin/xmaxima /usr/local/bin/xmaxima /usr/bin/xmaxima /home/richmit/s/linux/bin/xmaxima
+
+cmake === /usr/local/bin/cmake /opt/local/bin/cmake /usr/bin/cmake
+
+tmux === /usr/local/big/tmux-2.5/bin/tmux /usr/bin/tmux /usr/local/bin/tmux /usr/bin/tmux

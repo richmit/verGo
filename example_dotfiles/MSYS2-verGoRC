@@ -1,0 +1,98 @@
+rlwrap === /usr/bin/rlwrap
+
+winpty === /usr/bin/winpty
+
+R413 === '/c/Program Files/R/R-4.1.3/bin/R.exe'
+R420 === '/c/Program Files/R/R-4.2.0/bin/R.exe' 
+R422 === '/c/Program Files/R/R-4.2.2/bin/R.exe' 
+R431 === '/c/Program Files/R/R-4.3.1/bin/R.exe' 
+R === R431 R422 R420 R413 
+
+Rscript413 === '/c/Program Files/R/R-4.1.3/bin/Rscript.exe'
+Rscript420 === '/c/Program Files/R/R-4.2.0/bin/Rscript.exe' 
+Rscript422 === '/c/Program Files/R/R-4.2.2/bin/Rscript.exe' 
+Rscript431 === '/c/Program Files/R/R-4.3.1/bin/Rscript.exe' 
+Rscript === Rscript431 Rscript422 Rscript420 Rscript413 
+
+maxima === /c/maxima-5.46.0/bin/maxima.bat /c/maxima-5.45.1/bin/maxima.bat
+-e /c/maxima-5.45.1/bin/xmaxima.bat ::: xmaxima PATH=/c/maxima-5.45.1/bin === /c/maxima-5.45.1/bin/xmaxima.bat
+-e /c/maxima-5.45.1/bin/xmaxima.bat ::: xmaxima PATH=/c/maxima-5.45.1/bin === /c/maxima-5.45.1/bin/xmaxima.bat
+
+gpg2 === '/c/Program Files (x86)/GnuPG/bin/gpg.exe'
+
+bash === /usr/bin/bash.exe
+
+perl === /usr/bin/perl.exe
+
+python === /mingw64/bin/python.exe
+
+python2 === /mingw64/bin/python2.exe
+
+ruby === /mingw64/bin/ruby.exe
+
+ruby3 === /mingw64/bin/ruby.exe
+
+zsh  === /usr/bin/zsh.exe
+
+mjrimgview === /usr/bin/start
+
+acroread === '/c/Program Files/Adobe/Acrobat DC/Acrobat/Acrobat.exe'
+foxit === '/c/Program Files (x86)/Foxit Software/Foxit PDF Reader/FoxitPDFReader.exe'
+mjrpdfview === /usr/bin/start foxit acroread
+
+em === /mingw64/bin/emacs.exe
+
+emacsclient === /mingw64/bin/emacsclient.exe
+
+edge === '/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
+chrome === '/c/Program Files/Google/Chrome/Application/chrome.exe'
+browser === edge chrome
+
+"$MJR_LOC" == 'HOME'  ::: sbclMSYS -r sbcl 'SBCL_HOME=C:\Program Files\Steel Bank Common Lisp\' === '/c/Program Files/Steel Bank Common Lisp/sbcl.exe'
+sbcl === sbclMSYS
+lisp === sbcl
+
+sqlite3 -w === /mingw64/bin/sqlite3
+
+julia === '/c/Users/richmit/AppData/Local/Programs/Julia 1.5.2/bin/julia.exe'
+
+code === '/c/Program Files/Microsoft VS Code/Code.exe' '~/winHome/AppData/Local/Programs/Microsoft VS Code/bin/code'
+vsc === code
+
+fiji === /c/Users/richmit/PF/Fiji.app/ImageJ-win64.exe 
+
+imagej === /c/Users/richmit/PF/ImageJ/ImageJ.exe 
+
+ij === fiji
+
+free42 === /c/Users/richmit/PF/Free42/3.0.10/Free42Decimal.exe 
+
+ngspice === /c/Users/richmit/PF/ngspice/v39/Spice64/bin/ngspice.exe
+ngspice36 === /c/Users/richmit/PF/ngspice/v36/Spice64/bin/ngspice.exe
+ngspice38 === /c/Users/richmit/PF/ngspice/v38/Spice64/bin/ngspice.exe
+ngspice39 === /c/Users/richmit/PF/ngspice/v39/Spice64/bin/ngspice.exe
+
+ltspice === '/c/Program Files/LTC/LTspiceXVII/XVIIx64.exe'
+
+xyce === '/c/Program Files/Xyce 7.6 NORAD/bin/Xyce.exe'
+
+root === /c/root_v6.28.00/bin/root.exe
+
+cmaple -w === '/c/Program Files/Maple 2022/bin.X86_64_WINDOWS/cmaple.exe'
+maple === '/c/Program Files/Maple 2022/bin.X86_64_WINDOWS/maplew.exe'
+
+octave -w === '/c/Program Files/GNU Octave/Octave-7.3.0/octave-launch.exe'
+octave-gui === '/c/Program Files/GNU Octave/Octave-7.3.0/octave-launch.exe'
+
+povray === '/c/Program Files/POV-Ray/v3.7/bin/pvengine64.exe'
+
+paraview === '/c/Program Files/ParaView 5.11.0/bin/paraview.exe' 
+
+visit === '/c/Program Files/LLNL/VisIt 3.1.4/visit.exe'
+
+meshlab === '/c/Program Files/VCG/MeshLab/meshlab.exe'
+
+vs === '/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/devenv.exe'
+
+nomacs === '/c/Program Files/nomacs/bin/nomacs.exe'
+
