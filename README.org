@@ -1,0 +1,84 @@
+* verGo
+
+** Introduction
+
+  =verGo.sh= provides a much more sophisticated method to find preferred versions of various applications than trying to manage =PATH= variables or shell aliases.
+  =verGo.sh= is driven by a configuration file with each application being individually configured:
+    - Each application has it's own search path.  This allows one to use the same configuration file across systems with the applications installed in different
+      locations.
+    - Configuration lines can be selected based on logical conditions.  For example, a line might only be active on a particular version of an operating
+      system or when being run from a particular terminal.  
+    - Applications may be wrapped in "=rlwrap'="or "=winpty=" if desired.
+    - Each application can have a shell environment variables specified
+
+** Common Useage Patterns
+
+  =verGo.sh= is normally used in one of four ways:
+     1) Create a link to =verGo.sh=.  The name of the link will be used as the "application" name
+        This allows us to create a personal "bin" directory containing links to =verGo.sh= specifying various applications we use.
+     2) Run =verGo.sh= with the -app argument to specify the application name.
+     3) Run =verGo.sh= with the application name after any =verGo.sh= options. On Linux, this mode can be used for SHBANG lines: \\
+           =#!/home/richmit/bin/verGo.sh= ruby
+     4) On some platforms (BSDs for example) SHBANG lines require a binary, so you can use =verGo.sh= this way: \\
+           =#!/bin/bash /home/richmit/bin/ruby=
+
+** Command Line Options
+
+#+begin_src text
+    -noRun ................... Don't actually run the application
+    -app APP_NAME ............ Name of the application to run
+    -noWrap .................. Enable or disable rlwrap & winpty
+    -prtCmd .................. Print the command we find
+    -prtVar .................. Print the variables for the command we find
+                               Each variable is printed on a separate line
+                               If -prtCmd & -prtVar are both provided, the command is printed first
+    -prtFmt <UNIX|WIN|DOS> ... Print format for -prtCmd
+    -noErrors ................ Don't print errors -- still, exit, just don't print anything
+    -rcfile <FILE> ........... Use this RC file instead of ~/.verGoRC
+    -debug ................... Enable debugging
+#+end_src
+
+** Exit Codes
+
+    - 7 ERROR: Invalid value for -prtFmt
+    - 6 ERROR: No application name provided!
+    - 5 ERROR: rcfile not found!
+    - 4 ERROR: Duplicate app found in rcfile
+    - 3 ERROR: Application not supported
+    - 2 ERROR: Application supported, but no executable found
+    - 1 ERROR: Application supported, executable found, failed to exec
+    - 0 Application found in -noRun mode
+
+** Recipies
+
+    - To just see if =verGo.sh= knows about an application: Use the =-app= and =-noRun= options.
+    - To just print the command binary that would be executed: Use the =-app=, =-noRun=, and =-prtCmd= options.
+
+** Configuration file
+  
+    The default configuration file is ~/.verGoRC.  This may be overridden via the -rcfile option.  
+    A simple line oriented format is used with each line looking like: \\
+        =[BOOLEAN_EXPR ::: ] APP_NAME [-r HIST_NAME|-w] [VARIABLES] === ALTERNATIVES=
+    Syntax rules:
+      - The =APP_NAME= is the name of the application and may not contain whitespace
+      - When present, the =HIST_NAME=, must not contain whitespace
+      - =VARIABLES= is a space separated list of variable definitions of the form =FOO=BAR= -- may be single quoted
+        - Example: =PATH=/usr/bin 'HOMER_RANGE=/a/path with/spaces in it/'=
+      - =ALTERNATIVES= is a space separated list of fully qualified path component or =APP_NAME= values -- may be 
+        single quoted
+        - Example: =/a/path '/path/with spaces/foo.exe' anAppName /another/path=
+      - Note the whitespace in front of and after both operators ("=:::=" and "=====")!
+      - =BOOLEAN_EXPR= is a shell boolean expression -- something that can be placed between square brackets
+        - Variables available for use in this expression include:
+          - =HOSTNAME ...........= Hostname
+          - =OSTYPE .............= OS family name (msys for MSYS2, 
+          - =MACHTYPE ...........= Bash built-in for machine hardware type
+          - =HOME ...............= Usually set to the user home directory (some systems don't set this)
+          - =PATH ...............= The system path
+          - =MJR_LOC ............= Location of system as defined by the existence of a file like ~/mjrLOC-NAME
+        - Examples
+#+begin_src sh
+          - "$HOSTNAME" == 'foobar'
+          - "$OSTYPE" == 'msys' -a "$MACHTYPE" == 'x86_64'
+          - "$TERM" != 'dumb'
+#+end_src
