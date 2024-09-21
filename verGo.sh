@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env -S sh
 # -*- Mode:Shell-script; Coding:us-ascii-unix; fill-column:158 -*-
-################################################################################################################################################################
+#########################################################################################################################################################.H.S.##
 ##
 # @file      verGo.sh
 # @author    Mitch Richling <https://www.mitchr.me>
@@ -28,7 +28,16 @@
 #  @endparblock
 # @filedetails
 #
-#  Provides a way to find preferred versions of various applications.  
+#  verGo.sh provides a much more sophisticated method to find preferred versions of various applications than trying to manage PATH variables or shell aliases.
+#  verGo.sh is driven by a configuration file with each application being individually configured:
+#    - Each application has it's own search path.  This allows one to use the same configuration file across systems with the applications installed in different
+#      locations.
+#    - Configuration lines can be selected based on logical conditions.  For example, a line might only be active on a particular version of an operating
+#      system or when being run from a particular terminal.  
+#    - Applications may be wrapped in 'rlwrap' or 'winpty' if desired.
+#    - Each application can have a shell environment variables specified
+#
+#  verGo.sh is normally used in one of four ways:
 #     1) Create a link to verGo.sh.  The name of the link will be used as the "application" name
 #        This allows us to create a personal "bin" directory containing links to verGo.sh specifying various applications we use.
 #     2) Run verGo.sh with the -app argument to specify the application name.
@@ -87,8 +96,9 @@
 #        - Examples
 #          - "$HOSTNAME" == 'hofud'
 #          - "$OSTYPE" == 'msys' -a "$MACHTYPE" == 'x86_64'
+#          - "$TERM" != 'dumb'
 #
-################################################################################################################################################################
+#########################################################################################################################################################.H.E.##
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------
 DEBUG='NO'
@@ -168,17 +178,6 @@ if [ -e ~/.mjrLOC-*[A-Z] ]; then
   MJR_LOC=${MJR_LOC#*LOC-}
 fi
 
-# MJR_DNSDOMAIN='QUERY'
-# function lookupDNSDOMAIN {  
-#   if [ "$MJR_DNSDOMAIN" == 'QUERY' ]; then
-#     if [ -e /usr/bin/dnsdomainname ]; then
-#       MJR_DNSDOMAIN=$(/usr/bin/dnsdomainname)
-#     else
-#       MJR_DNSDOMAIN='UNKNOWN'
-#     fi
-#   fi
-# }
-
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Read in config file.  
 declare -a verGoRCwino
@@ -241,15 +240,6 @@ while IFS= read -r line; do
     fi
   fi
 done < "$RCFILE"
-
-# for verGoRCIdx in "${!verGoRCapps[@]}"; do
-#   echo "IDX: $verGoRCIdx "
-#   echo "     app: =>${verGoRCapps[$verGoRCIdx]}<="
-#   echo "     win: =>${verGoRCwino[$verGoRCIdx]}<="
-#   echo "     rwl: =>${verGoRCrlwo[$verGoRCIdx]}<="
-#   echo "     var: =>${verGoRCvars[$verGoRCIdx]}<="
-#   echo "     alt: =>${verGoRClist[$verGoRCIdx]}<="
-# done
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------
 function findAppIdx {
