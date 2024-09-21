@@ -211,7 +211,9 @@ while IFS= read -r line; do
           done 
           winbit='NO'
           if [[ "$varbit" == '-w'* ]]; then
-            winbit='YES'
+            if [ "$TERM" != 'dumb' ]; then # winpty won't work in a dumb terminal
+              winbit='YES'
+            fi
             varbit=${varbit#-w}
             varbit=${varbit# }
           fi
