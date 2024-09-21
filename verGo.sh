@@ -132,6 +132,11 @@ if [ "$APPNAME" = 'verGo.sh' ] ; then
   if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: Running in SHBANG mode!"; fi
 fi
 
+if [ "$DOWRAP" == 'YES' -a "$TERM" == 'dumb' ]; then # winpty & rlwrap won't work in a dumb terminal
+  if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Wrap disabled because of dumb terminal!" ; fi
+  DOWRAP='NO'
+fi
+
 if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: APPNAME  = $APPNAME "; fi
 if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: DOERRORS = $DOERRORS"; fi
 if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: RUNMODE  = $RUNMODE "; fi
@@ -211,9 +216,7 @@ while IFS= read -r line; do
           done 
           winbit='NO'
           if [[ "$varbit" == '-w'* ]]; then
-            if [ "$TERM" != 'dumb' ]; then # winpty won't work in a dumb terminal
-              winbit='YES'
-            fi
+            winbit='YES'
             varbit=${varbit#-w}
             varbit=${varbit# }
           fi
@@ -326,7 +329,6 @@ else
     done
     if [ "$RUNMODE" = 'YES' ] ; then
       IFS=
-      # Figure out path for winpty & rlwrap if required...
       WINBIN='winpty'
       RLWBIN='rlwrap'
       if [ "$DOWRAP" == 'YES' -a "${verGoRCwino[$verGoIdx]}" == 'YES' ]; then
