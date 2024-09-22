@@ -9,7 +9,7 @@
     - Configuration lines can be selected based on logical conditions.  For example, a line might only be active on a particular version of an operating
       system or when being run from a particular terminal.  
     - Applications may be wrapped in "=rlwrap'="or "=winpty=" if desired.
-    - Each application can have a shell environment variables specified
+    - Each application can have runtime shell environment variables defined.
 
 ** Common Useage Patterns
 
@@ -77,8 +77,6 @@
           - =PATH ...............= The system path
           - =MJR_LOC ............= Location of system as defined by the existence of a file like ~/mjrLOC-NAME
         - Examples
-#+begin_src sh
-          - "$HOSTNAME" == 'foobar'
-          - "$OSTYPE" == 'msys' -a "$MACHTYPE" == 'x86_64'
-          - "$TERM" != 'dumb'
-#+end_src
+          - ~"$HOSTNAME" == 'foobar'~
+          - ~"$OSTYPE" == 'msys' -a "$MACHTYPE" == 'x86_64'~
+          - ~"$TERM" != 'dumb'~
