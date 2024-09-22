@@ -40,14 +40,14 @@
 
 ** Exit Codes
 
-    - 7 ERROR: Invalid value for -prtFmt
+    - 7 ERROR: Invalid value for ~-prtFmt~
     - 6 ERROR: No application name provided!
     - 5 ERROR: rcfile not found!
     - 4 ERROR: Duplicate app found in rcfile
     - 3 ERROR: Application not supported
     - 2 ERROR: Application supported, but no executable found
     - 1 ERROR: Application supported, executable found, failed to exec
-    - 0 Application found in -noRun mode
+    - 0 Application found in ~-noRun~ mode
 
 ** Recipies
 
