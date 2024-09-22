@@ -67,7 +67,7 @@
       - =ALTERNATIVES= is a space separated list of fully qualified path component or =APP_NAME= values -- may be 
         single quoted
         - Example: =/a/path '/path/with spaces/foo.exe' anAppName /another/path=
-      - Note the whitespace in front of and after both operators ("=:::=" and "=====")!
+      - Note the whitespace in front of and after both operators ("~:::~" and "~===~")!
       - =BOOLEAN_EXPR= is a shell boolean expression -- something that can be placed between square brackets
         - Variables available for use in this expression include:
           - =HOSTNAME ...........= Hostname
