@@ -8,7 +8,7 @@
       locations.
     - Configuration lines can be selected based on logical conditions.  For example, a line might only be active on a particular version of an operating
       system or when being run from a particular terminal.  
-    - Applications may be wrapped in "=rlwrap'="or "=winpty=" if desired.
+    - Applications may be wrapped in "=rlwrap=" or "=winpty=" if desired.
     - Each application can have runtime shell environment variables defined.
 
 ** Common Useage Patterns
