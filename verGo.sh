@@ -142,7 +142,7 @@ if [ "$APPNAME" = 'verGo.sh' ] ; then
   if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: Running in SHBANG mode!"; fi
 fi
 
-if [ "$DOWRAP" == 'YES' -a "$TERM" == 'dumb' ]; then # winpty & rlwrap won't work in a dumb terminal
+if [ "$DOWRAP" = 'YES' -a "$TERM" = 'dumb' ]; then # winpty & rlwrap won't work in a dumb terminal
   if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Wrap disabled because of dumb terminal!" ; fi
   DOWRAP='NO'
 fi
