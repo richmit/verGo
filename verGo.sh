@@ -47,17 +47,22 @@
 #           #!/bin/bash /home/richmit/bin/ruby
 #
 #  Command line options:
-#    -noRun ................... Don't actually run the application
-#    -app APP_NAME ............ Name of the application to run
-#    -noWrap .................. Enable or disable rlwrap & winpty
-#    -prtCmd .................. Print the command we find
-#    -prtVar .................. Print the variables for the command we find
-#                               Each variable is printed on a separate line
-#                               If -prtCmd & -prtVar are both provided, the command is printed first
-#    -prtFmt <UNIX|WIN|DOS> ... Print format for -prtCmd
-#    -noErrors ................ Don't print errors -- still, exit, just don't print anything
-#    -rcfile <FILE> ........... Use this RC file instead of ~/.verGoRC
-#    -debug ................... Enable debugging
+#    -noRun .......................... Don't actually run the application
+#    -app APP_NAME ................... Name of the application to run
+#    -noWrap ......................... Enable or disable rlwrap & winpty
+#    -prtCmd ......................... Print the command we find
+#    -prtVar ......................... Print the variables for the command we find
+#                                      Each variable is printed on a separate line
+#                                      If -prtCmd & -prtVar are both provided, the command is printed first
+#    -prtFmt <RAW|UNIX|WIN|DOS|MIX> .. Print format for -prtCmd
+#                                      DOS ......... DOS short form (C:\PROGRA~1\)
+#                                      WIN ......... Windows form (C:\WINNT)
+#                                      MIXED ....... Like WIN, but with forward slashes (C:/WINNT)
+#                                      UNIX ........ Unix form (/cygdrive/c/winnt)
+#                                      RAW ......... Whatever comes out of the config file
+#    -noErrors ....................... Don't print errors -- still, exit, just don't print anything
+#    -rcfile <FILE> .................. Use this RC file instead of ~/.verGoRC
+#    -debug .......................... Enable debugging
 #
 #  Exit Codes
 #    - 7 ERROR: Invalid value for -prtFmt
@@ -107,7 +112,7 @@ if [ -n "$VERGODEBUG" ]; then
    if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: Debug enabled via VERGODEBUG environment variable"; fi
 fi
 DBGPRS='NO'
-PRTFMT='UNIX'
+PRTFMT='RAW'
 APPNAME=''
 DOERRORS='YES'
 RUNMODE='YES'
@@ -157,7 +162,7 @@ if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: PRTFMT   = $PRTFMT  "; fi
 if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: RCFILE   = $RCFILE  "; fi
 if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: DOWRAP   = $DOWRAP  "; fi
 
-if [ "$PRTFMT" != 'UNIX' -a "$PRTFMT" != 'WIN' -a "$PRTFMT" != 'DOS' ]; then
+if [ "$PRTFMT" != 'RAW' -a "$PRTFMT" != 'UNIX' -a "$PRTFMT" != 'WIN' -a "$PRTFMT" != 'MIX' -a "$PRTFMT" != 'DOS' ]; then
   if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Invalid value for -prtFmt: $PRTFMT"; fi
   exit 7
 fi
@@ -299,8 +304,12 @@ else
     if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application rlwrap opt: '${verGoRCrlwo[$verGoIdx]}'" ; fi
     if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application winpty opt: ${verGoRCwino[$verGoIdx]}" ; fi
     if [ "$PRTCMD"  = 'YES' ] ; then 
-      if   [ "$PRTFMT" == 'UNIX' ]; then
+      if   [ "$PRTFMT" == 'RAW' ]; then
         echo "$verGoBin"
+      elif [ "$PRTFMT" == 'UNIX'  ]; then
+        cygpath -u "$verGoBin"
+      elif [ "$PRTFMT" == 'MIX'  ]; then
+        cygpath -m "$verGoBin"
       elif [ "$PRTFMT" == 'WIN'  ]; then
         cygpath -w "$verGoBin"
       elif [ "$PRTFMT" == 'DOS'  ]; then
