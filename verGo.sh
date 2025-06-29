@@ -57,8 +57,8 @@
 #    -prtFmt <RAW|UNIX|WIN|DOS|MIX> .. Print format for -prtCmd
 #                                      DOS ......... DOS short form (C:\PROGRA~1\)
 #                                      WIN ......... Windows form (C:\WINNT)
-#                                      MIXED ....... Like WIN, but with forward slashes (C:/WINNT)
-#                                      UNIX ........ Unix form (/cygdrive/c/winnt)
+#                                      MIX ......... Like WIN, but with forward slashes (C:/WINNT)
+#                                      UNX ......... Unix form (/cygdrive/c/winnt)
 #                                      RAW ......... Whatever comes out of the config file
 #    -noErrors ....................... Don't print errors -- still, exit, just don't print anything
 #    -rcfile <FILE> .................. Use this RC file instead of ~/.verGoRC
@@ -122,7 +122,7 @@ RCFILE=~/.verGoRC
 DOWRAP='YES'
 while [ -z "$HAVEMORE" ] ; do
   case "$1" in
-    -noRun    ) RUNMODE='NO'; DOERRORS='NO'; shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noRun"           ; fi ;;
+    -noRun    ) RUNMODE='NO';                shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noRun"           ; fi ;;
     -app      ) APPNAME=$2;                  shift; shift ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -app $APPNAME"    ; fi ;;
     -noWrap   ) DOWRAP='NO';                 shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noWrap"          ; fi ;;
     -prtCmd   ) PRTCMD='YES';                shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -prtCmd"          ; fi ;;
@@ -162,7 +162,7 @@ if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: PRTFMT   = $PRTFMT  "; fi
 if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: RCFILE   = $RCFILE  "; fi
 if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: DOWRAP   = $DOWRAP  "; fi
 
-if [ "$PRTFMT" != 'RAW' -a "$PRTFMT" != 'UNIX' -a "$PRTFMT" != 'WIN' -a "$PRTFMT" != 'MIX' -a "$PRTFMT" != 'DOS' ]; then
+if [ "$PRTFMT" != 'RAW' -a "$PRTFMT" != 'UNX' -a "$PRTFMT" != 'WIN' -a "$PRTFMT" != 'MIX' -a "$PRTFMT" != 'DOS' ]; then
   if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Invalid value for -prtFmt: $PRTFMT"; fi
   exit 7
 fi
@@ -306,7 +306,7 @@ else
     if [ "$PRTCMD"  = 'YES' ] ; then 
       if   [ "$PRTFMT" == 'RAW' ]; then
         echo "$verGoBin"
-      elif [ "$PRTFMT" == 'UNIX'  ]; then
+      elif [ "$PRTFMT" == 'UNX'  ]; then
         cygpath -u "$verGoBin"
       elif [ "$PRTFMT" == 'MIX'  ]; then
         cygpath -m "$verGoBin"
