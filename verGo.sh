@@ -81,10 +81,16 @@
 #  Configuration file
 #    The default configuration file is ~/.verGoRC.  This may be overridden via the -rcfile option.  
 #    A simple line oriented format is used with each line looking like:
-#        [BOOLEAN_EXPR ::: ] APP_NAME [-r HIST_NAME|-w] [VARIABLES] === ALTERNATIVES
+#        [BOOLEAN_EXPR ::: ] APP_NAME [-w] [-r HIST_NAME] [VARIABLES] === ALTERNATIVES
 #    Syntax rules:
 #      - The APP_NAME is the name of the application and may not contain whitespace
-#      - When present, the HIST_NAME, must not contain whitespace
+#      - If multiple flags (-w & -r) are used, then they must appear in the order above
+#      - Flags:
+#        - -w  Run with winpty
+#        - -r  Run with rlwrap using HIST_NAME for the filename.  
+#              HIST_NAME is required.
+#              HIST_NAME must not contain whitespace, and may *NOT* be quoted.
+#              HIST_NAME must be an acceptable value for the rlwrap -H option.
 #      - VARIABLES is a space separated list of variable definitions of the form FOO=BAR -- may be single quoted
 #        - Example: PATH=/usr/bin 'HOMER_RANGE=/a/path with/spaces in it/'
 #      - ALTERNATIVES is a space separated list of fully qualified paths or APP_NAMEs -- may be single quoted
@@ -102,6 +108,9 @@
 #          - "$HOSTNAME" == 'hofud'
 #          - "$OSTYPE" == 'msys' -a "$MACHTYPE" == 'x86_64'
 #          - "$TERM" != 'dumb'
+#
+#  ToDo:
+#    - Config file: Add option to start in directory containing the executable.  Perhaps [-c] -- for 'cd first'
 #
 #########################################################################################################################################################.H.E.##
 
@@ -191,9 +200,9 @@ declare -a verGoRCapps
 declare -a verGoRCvars
 declare -a verGoRClist
 while IFS= read -r line; do
-  if [ -n "$line" ]; then
-    if [[ "$line" != '#'* ]]; then
-      if [[ "$line" == *' === '* ]]; then
+  if [ -n "$line" ]; then                                                   # Empty line
+    if [[ "$line" != '#'* ]]; then                                          # Comment line
+      if [[ "$line" == *' === '* ]]; then                                   # All spec lines must contain ' === '
         if [ "$DBGPRS" = 'YES' ] ; then echo "LINE: $line"; fi
         tstbit='-n TRUE'
         if [[ "$line" == *' ::: '* ]]; then
