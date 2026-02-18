@@ -84,9 +84,14 @@
 #        [BOOLEAN_EXPR ::: ] APP_NAME [-w] [-r HIST_NAME] [VARIABLES] === ALTERNATIVES
 #    Syntax rules:
 #      - The APP_NAME is the name of the application and may not contain whitespace
-#      - If multiple flags (-w & -r) are used, then they must appear in the order above
+#      - If multiple flags (-c, -w, and/or -r) are used, then they must appear in the order above
+#      - Flags must be preceded and followed by precisely one space.
 #      - Flags:
+#        - -c  Run executable from within the directory in which the executable is found.
+#              This is useful for applications that package secondary executable in the directory with the primary executable.
+#              This practice is most common on Windows, but a few UNIX-ish applications do it too.
 #        - -w  Run with winpty
+#              Allows a Windows console program to properly interact with a Cygwin/MSYS pty.
 #        - -r  Run with rlwrap using HIST_NAME for the filename.  
 #              HIST_NAME is required.
 #              HIST_NAME must not contain whitespace, and may *NOT* be quoted.
@@ -109,9 +114,6 @@
 #          - "$OSTYPE" == 'msys' -a "$MACHTYPE" == 'x86_64'
 #          - "$TERM" != 'dumb'
 #
-#  ToDo:
-#    - Config file: Add option to start in directory containing the executable.  Perhaps [-c] -- for 'cd first'
-#
 #########################################################################################################################################################.H.E.##
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -129,6 +131,7 @@ PRTCMD='NO'
 PRTVAR='NO'
 RCFILE=~/.verGoRC
 DOWRAP='YES'
+DOCD='YES'
 while [ -z "$HAVEMORE" ] ; do
   case "$1" in
     -noRun    ) RUNMODE='NO';                shift        ; if [ "$DEBUG" = 'YES' ] ; then echo "INFO: Command line arg: -noRun"           ; fi ;;
@@ -194,6 +197,7 @@ fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Read in config file.  
+declare -a verGoRCcdo
 declare -a verGoRCwino
 declare -a verGoRCrlwo
 declare -a verGoRCapps
@@ -227,6 +231,14 @@ while IFS= read -r line; do
               exit 4
             fi
           done 
+
+          cdbit='NO'
+          if [[ "$varbit" == '-c'* ]]; then
+            cdbit='YES'
+            varbit=${varbit#-c}
+            varbit=${varbit# }
+          fi
+          if [ "$DBGPRS" = 'YES' ] ; then echo "   cdbit: $cdbit"; fi
           winbit='NO'
           if [[ "$varbit" == '-w'* ]]; then
             winbit='YES'
@@ -243,6 +255,7 @@ while IFS= read -r line; do
           if [ "$DBGPRS" = 'YES' ] ; then echo "   rlwbit: $rlwbit"; fi
           if [ "$DBGPRS" = 'YES' ] ; then echo "   varbit: $varbit"; fi
           verGoRCrlwo+=("$rlwbit")
+          verGoRCcdo+=("$cdbit")
           verGoRCwino+=("$winbit")
           verGoRCapps+=("$appbit")
           verGoRCvars+=("$varbit")
@@ -310,6 +323,7 @@ else
     if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application found:      $verGoBin" ; fi
     if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application final app:  ${verGoRCapps[$verGoIdx]}" ; fi
     if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application variables:  ${verGoRCvars[$verGoIdx]}" ; fi
+    if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application CD opt:     ${verGoRCcdo[$verGoIdx]}" ; fi
     if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application rlwrap opt: '${verGoRCrlwo[$verGoIdx]}'" ; fi
     if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application winpty opt: ${verGoRCwino[$verGoIdx]}" ; fi
     if [ "$PRTCMD"  = 'YES' ] ; then 
@@ -356,7 +370,13 @@ else
           fi
         fi
       fi
-      # We have everything we need.  Run it...
+      # We have everything we need. CD into application directory if required and run it.
+      if [ "$DOCD" == 'YES' -a "${verGoRCcdo[$verGoIdx]}" == 'YES' ]; then
+        if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Attempting to cd into application directory" ; fi
+        cd $(dirname "$verGoBin")
+      fi
+      if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Current working dir: " `pwd` ; fi
+
       if [ "$DOWRAP" == 'YES' -a "${verGoRCwino[$verGoIdx]}" == 'YES' ]; then
         exec env "${verGoVars[@]}" "$WINBIN" "$verGoBin" "$@"
       else
