@@ -106,7 +106,6 @@ vs === '/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/deve
 
 nomacs === '/c/Program Files/nomacs/bin/nomacs.exe'
 
-
 stm32cubeide -c === /c/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/stm32cubeide.exe
 stm32cubemx -c === '/c//Program Files/STMicroelectronics/STM32Cube/STM32CubeMX/STM32CubeMX.exe'
 stm32cubeprog -c === '/c/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32CubeProgrammer.exe'
