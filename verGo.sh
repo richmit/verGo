@@ -164,6 +164,11 @@ if [ "$DOWRAP" = 'YES' -a "$TERM" = 'dumb' ]; then # winpty & rlwrap won't work 
   DOWRAP='NO'
 fi
 
+if [ "$PRTFMT" != 'RAW' -z -n `command -v cygpath`]; then
+  if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: -prtFmt override to RAW because of missing cygpath!" ; fi
+  PRTFMT='RAW'
+fi
+
 if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: APPNAME  = $APPNAME "; fi
 if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: DOERRORS = $DOERRORS"; fi
 if [ "$DEBUG" = 'YES' ] ; then echo "DEBUG: RUNMODE  = $RUNMODE "; fi
