@@ -164,7 +164,7 @@ if [ "$DOWRAP" = 'YES' -a "$TERM" = 'dumb' ]; then # winpty & rlwrap won't work 
   DOWRAP='NO'
 fi
 
-if [ "$PRTFMT" != 'RAW' -z -n `command -v cygpath`]; then
+if [ "$PRTFMT" != 'RAW' -a -z `command -v cygpath` ]; then
   if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: -prtFmt override to RAW because of missing cygpath!" ; fi
   PRTFMT='RAW'
 fi
@@ -317,85 +317,87 @@ function findAppBin {
 if [ -z "$(findAppIdx "$APPNAME")" ]; then
   if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application not supported: $APPNAME"; fi
   exit 3
-else
-  SRES=$(findAppBin "$APPNAME")
-  if [ -z "$SRES" ]; then
-    if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application supported, but no executable found: $APPNAME"; fi
-    exit 2
-  else
-    verGoIdx=${SRES%% *}
-    verGoBin=${SRES#* }
-    if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application found:      $verGoBin" ; fi
-    if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application final app:  ${verGoRCapps[$verGoIdx]}" ; fi
-    if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application variables:  ${verGoRCvars[$verGoIdx]}" ; fi
-    if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application CD opt:     ${verGoRCcdo[$verGoIdx]}" ; fi
-    if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application rlwrap opt: '${verGoRCrlwo[$verGoIdx]}'" ; fi
-    if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application winpty opt: ${verGoRCwino[$verGoIdx]}" ; fi
-    if [ "$PRTCMD"  = 'YES' ] ; then 
-      if   [ "$PRTFMT" == 'RAW' ]; then
-        echo "$verGoBin"
-      elif [ "$PRTFMT" == 'UNX'  ]; then
-        cygpath -u "$verGoBin"
-      elif [ "$PRTFMT" == 'MIX'  ]; then
-        cygpath -m "$verGoBin"
-      elif [ "$PRTFMT" == 'WIN'  ]; then
-        cygpath -w "$verGoBin"
-      elif [ "$PRTFMT" == 'DOS'  ]; then
-        cygpath -d "$verGoBin"
-      fi
-    fi
-    # Create an array with variables -- so we can quote them later for env.  Also print vars if requested.
-    declare -a verGoVars
-    verGoVars+=("VERGO=$APPNAME")
-    IFS=$'\n'
-    for varset in `echo ${verGoRCvars[$verGoIdx]} | /usr/bin/xargs -n 1 /bin/echo`; do 
-      verGoVars+=("$varset")
-      if [ "$PRTVAR" == 'YES' ] ; then 
-        echo "$varset"
-      fi
-    done
-    if [ "$RUNMODE" = 'YES' ] ; then
-      IFS=
-      WINBIN='winpty'
-      RLWBIN='rlwrap'
-      if [ "$DOWRAP" == 'YES' -a "${verGoRCwino[$verGoIdx]}" == 'YES' ]; then
-        SRES=$(findAppBin "winpty")
-        if [ -n "$SRES" ]; then
-          WINBIN=${SRES#* }
-        else
-          if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Could not find winpty in RCFILE" ; fi
-        fi
-      else
-        if [ "$DOWRAP" == 'YES' -a -n "${verGoRCrlwo[$verGoIdx]}" ]; then
-          SRES=$(findAppBin "rlwrap")
-          if [ -n "$SRES" ]; then
-            RLWBIN=${SRES#* }
-          else
-            if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Could not find rlwrap in RCFILE" ; fi
-          fi
-        fi
-      fi
-      # We have everything we need. CD into application directory if required and run it.
-      if [ "$DOCD" == 'YES' -a "${verGoRCcdo[$verGoIdx]}" == 'YES' ]; then
-        if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Attempting to cd into application directory" ; fi
-        cd $(dirname "$verGoBin")
-      fi
-      if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Current working dir: " `pwd` ; fi
+fi
 
-      if [ "$DOWRAP" == 'YES' -a "${verGoRCwino[$verGoIdx]}" == 'YES' ]; then
-        exec env "${verGoVars[@]}" "$WINBIN" "$verGoBin" "$@"
-      else
-        if [ "$DOWRAP" == 'YES' -a -n "${verGoRCrlwo[$verGoIdx]}" ]; then
-          exec env "${verGoVars[@]}" "$RLWBIN" -C "${verGoRCrlwo[$verGoIdx]}" "$verGoBin" "$@"
-        else
-          exec env "${verGoVars[@]}" "$verGoBin" "$@"
-        fi
-      fi
-      if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application supported, executable found, failed to exec: $APPNAME"; fi
-      exit 1
-    fi
-    exit 0
+SRES=$(findAppBin "$APPNAME")
+if [ -z "$SRES" ]; then
+  if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application supported, but no executable found: $APPNAME"; fi
+  exit 2
+fi
+
+verGoIdx=${SRES%% *}
+verGoBin=${SRES#* }
+if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application found:      $verGoBin" ; fi
+if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application final app:  ${verGoRCapps[$verGoIdx]}" ; fi
+if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application variables:  ${verGoRCvars[$verGoIdx]}" ; fi
+if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application CD opt:     ${verGoRCcdo[$verGoIdx]}" ; fi
+if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application rlwrap opt: '${verGoRCrlwo[$verGoIdx]}'" ; fi
+if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Application winpty opt: ${verGoRCwino[$verGoIdx]}" ; fi
+
+if [ "$PRTCMD"  = 'YES' ] ; then 
+  if   [ "$PRTFMT" == 'RAW' ]; then
+    echo "$verGoBin"
+  elif [ "$PRTFMT" == 'UNX'  ]; then
+    cygpath -u "$verGoBin"
+  elif [ "$PRTFMT" == 'MIX'  ]; then
+    cygpath -m "$verGoBin"
+  elif [ "$PRTFMT" == 'WIN'  ]; then
+    cygpath -w "$verGoBin"
+  elif [ "$PRTFMT" == 'DOS'  ]; then
+    cygpath -d "$verGoBin"
   fi
 fi
 
+# Create an array with variables -- so we can quote them later for env.  Also print vars if requested.
+declare -a verGoVars
+verGoVars+=("VERGO=$APPNAME")
+IFS=$'\n'
+for varset in `echo ${verGoRCvars[$verGoIdx]} | /usr/bin/xargs -n 1 /bin/echo`; do 
+  verGoVars+=("$varset")
+  if [ "$PRTVAR" == 'YES' ] ; then 
+    echo "$varset"
+  fi
+done
 
+if [ "$RUNMODE" = 'YES' ] ; then
+  IFS=
+  WINBIN='winpty'
+  RLWBIN='rlwrap'
+  if [ "$DOWRAP" == 'YES' -a "${verGoRCwino[$verGoIdx]}" == 'YES' ]; then
+    SRES=$(findAppBin "winpty")
+    if [ -n "$SRES" ]; then
+      WINBIN=${SRES#* }
+    else
+      if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Could not find winpty in RCFILE" ; fi
+    fi
+  else
+    if [ "$DOWRAP" == 'YES' -a -n "${verGoRCrlwo[$verGoIdx]}" ]; then
+      SRES=$(findAppBin "rlwrap")
+      if [ -n "$SRES" ]; then
+        RLWBIN=${SRES#* }
+      else
+        if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Could not find rlwrap in RCFILE" ; fi
+      fi
+    fi
+  fi
+  # We have everything we need. CD into application directory if required and run it.
+  if [ "$DOCD" == 'YES' -a "${verGoRCcdo[$verGoIdx]}" == 'YES' ]; then
+    if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Attempting to cd into application directory" ; fi
+    cd $(dirname "$verGoBin")
+  fi
+  if [ "$DEBUG"   = 'YES' ] ; then echo "DEBUG: Current working dir: " `pwd` ; fi
+
+  if [ "$DOWRAP" == 'YES' -a "${verGoRCwino[$verGoIdx]}" == 'YES' ]; then
+    exec env "${verGoVars[@]}" "$WINBIN" "$verGoBin" "$@"
+  else
+    if [ "$DOWRAP" == 'YES' -a -n "${verGoRCrlwo[$verGoIdx]}" ]; then
+      exec env "${verGoVars[@]}" "$RLWBIN" -C "${verGoRCrlwo[$verGoIdx]}" "$verGoBin" "$@"
+    else
+      exec env "${verGoVars[@]}" "$verGoBin" "$@"
+    fi
+  fi
+  if [ "$DOERRORS" = 'YES' ] ; then echo "ERROR: Application supported, executable found, failed to exec: $APPNAME"; fi
+  exit 1
+fi
+
+exit 0
