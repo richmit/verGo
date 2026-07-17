@@ -1,0 +1,5 @@
+* Version Go
+
+  - =verGo.sh= is a shell script that provides a much more sophisticated method to find preferred versions of various 
+    applications than trying to manage =PATH= variables or shell aliases.
+  - =mjr-vergo= is an Emacs package using the =verGo.sh= to locate various applications used by Emacs.
