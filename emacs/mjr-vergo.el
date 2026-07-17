@@ -3,7 +3,7 @@
 ;; Copyright (C) 2026-2026 First Last me@mitchr.me
 
 ;; Author:      Mitch Richling
-;; Version:     0.9
+;; Version:     0.10
 ;; Keywords:    verGo
 ;; URL:         https://github.com/richmit/verGo
 
@@ -49,7 +49,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;###autoload
 (defgroup mjr-vergo nil
-  "Access verGo.sh from emacs.")
+  "Access verGo.sh from emacs."
+  :group 'external
+  :group 'environment)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;###autoload
@@ -61,8 +63,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;###autoload
 (defun mjr-vergo (app &optional path-format)
-  "Use verGo.sh to find a binary and any environment variables  that need to be set (returned as a list of strings).
-If path-format is invalid or missing, then `MIX' is used.  NIL is returned if anything goes wrong -- no errors are raised."
+  "Use verGo.sh to find a binary and environment variables (list of strings).
+If path-format is invalid or missing, then `MIX' is used.  
+NIL is returned if anything goes wrong -- no errors are raised."
   (when-let* ((path-format (or (car (member path-format '(RAW UNIX WIN DOS MIX)))
                                'MIX))
               (ver-go-bin  mjr-vergo-bin)
