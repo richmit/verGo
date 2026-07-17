@@ -3,7 +3,7 @@
 ;; Copyright (C) 2026-2026 First Last me@mitchr.me
 
 ;; Author:      Mitch Richling
-;; Version:     0.5
+;; Version:     0.6
 ;; Keywords:    verGo
 ;; URL:         https://github.com/richmit/verGo
 
@@ -22,7 +22,7 @@
 ;;   - Run the following:
 ;;     (package-vc-install (list 'mjr-vergo
 ;;                               :url "https://github.com/richmit/verGo"
-;;                               :lisp-dir "emacs-lisp"
+;;                               :lisp-dir "emacs"
 ;;                               :main-file "mjr-vergo.el"
 ;;                               :rev 'newest))
 
