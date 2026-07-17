@@ -3,7 +3,7 @@
 ;; Copyright (C) 2026-2026 First Last me@mitchr.me
 
 ;; Author:      Mitch Richling
-;; Version:     0.6
+;; Version:     0.9
 ;; Keywords:    verGo
 ;; URL:         https://github.com/richmit/verGo
 
