@@ -1,12 +1,15 @@
 Version Go Tools
 
 These tools provide a much more sophisticated method to find preferred
-versions of various applications than trying to manage =PATH=
-variables or shell aliases.
+versions of various applications than trying to manage PATH variables
+or shell aliases.
 
 The github repository: https://github.com/richmit/verGo
 
 The larger packge contains two tools:
 
-  - =verGo.sh= a shell script focused on finding and running applictions: https://github.com/richmit/verGo/shell_scripts
-  -=mjr-vergo= an Emacs package focused on locateing applications: https://github.com/richmit/verGo/emacs
+  - A shell script focused on finding and running applictions: 
+    https://github.com/richmit/verGo/shell_scripts
+
+  - An Emacs package focused on locateing applications: 
+    https://github.com/richmit/verGo/emacs
