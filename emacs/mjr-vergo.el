@@ -2,9 +2,8 @@
 
 ;; Copyright (C) 2026-2026 First Last me@mitchr.me
 
-;; Author:      Mitch Richling <https://github.com/richmit/verGo>
-;; Created:     2026-07-17
-;; Version:     0.2
+;; Author:      Mitch Richling
+;; Version:     0.5
 ;; Keywords:    verGo
 ;; URL:         https://github.com/richmit/verGo
 
@@ -12,18 +11,40 @@
 
 ;;; Install:
 
-;; Manual: Put mjr-vergo.el on your `load-path' and add to your ~/.emacs startup file:
-;;      (require 'mjr-vergo)
-;; As a package:
-;;      (package-vc-install (list 'mjr-vergo
-;;                                :url "https://github.com/richmit/verGo"
-;;                                :lisp-dir "emacs-lisp"
-;;                                :main-file "mjr-vergo.el"
-;;                                :rev 'newest))
+;; Manual (with `load-path'): 
+;;   - Put mjr-vergo.el somplace
+;;   - Add the directory with mjr-vergo.el to the `load-path'
+;;   - Add this to ~/.emacs: (require 'mjr-vergo)
+;; Manual (no `load-path' option):
+;;   - Put mjr-vergo.el somplace
+;;   - Add this to ~/.emacs: (require 'mjr-vergo "fully_qualified_path_name_for_mjr-vergo.el")
+;; As a package pulled from github:
+;;   - Run the following:
+;;     (package-vc-install (list 'mjr-vergo
+;;                               :url "https://github.com/richmit/verGo"
+;;                               :lisp-dir "emacs-lisp"
+;;                               :main-file "mjr-vergo.el"
+;;                               :rev 'newest))
 
 ;;; Commentary:
 
 ;; Provide access to verGo.sh from inside Emacs.
+;; The following examples use my dot files.
+;;
+;;     (mjr-vergo "lisp")
+;;     ("C:/Program Files/Steel Bank Common Lisp/sbcl.exe" "SBCL_HOME=C:\\Program Files\\Steel Bank Common Lisp\\")
+;; 
+;;     (mjr-vergo "lisp" 'RAW)
+;;     ("/c/Program Files/Steel Bank Common Lisp/sbcl.exe" "SBCL_HOME=C:\\Program Files\\Steel Bank Common Lisp\\")
+;;
+;; From the command line: 
+;;
+;;     verGo.sh -noErrors -noRun -prtCmd -prtVar -prtFmt RAW lisp
+;;     
+;;     /c/Program Files/Steel Bank Common Lisp/sbcl.exe
+;;     SBCL_HOME=C:\Program Files\Steel Bank Common Lisp\
+
+;;; Code:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;###autoload
@@ -62,15 +83,4 @@ If path-format is invalid or missing, then `MIX' is used.  NIL is returned if an
 
 (provide 'mjr-vergo)
 
- 
-;;(load-library "~/.emacs.d/mjr-vergo.el")
-
-;;(mjr-vergo "octave")
-;;(require 'mjr-vergo)
-
-;;(push "c:/msys64/home/richmit/.emacs.d/" load-path)
-
-
-
-;;(package-vc-install-from-checkout
-
+;;; filename ends here
