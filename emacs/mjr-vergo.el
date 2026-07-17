@@ -4,7 +4,7 @@
 
 ;; Author:      Mitch Richling <https://github.com/richmit/verGo>
 ;; Created:     2026-07-17
-;; Version:     0.1
+;; Version:     0.2
 ;; Keywords:    verGo
 ;; URL:         https://github.com/richmit/verGo
 
