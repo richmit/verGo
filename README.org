@@ -1,6 +1,6 @@
-* verGo
+#+TITLE: verGo
 
-** Introduction
+* Introduction
 
   =verGo.sh= provides a much more sophisticated method to find preferred versions of various applications than trying to manage =PATH= variables or shell aliases.
   =verGo.sh= is driven by a configuration file with each application being individually configured:
@@ -11,7 +11,7 @@
     - Applications may be wrapped in "=rlwrap=" or "=winpty=" if desired.
     - Each application can have runtime shell environment variables defined.
 
-** Common Useage Patterns
+* Common Useage Patterns
 
   =verGo.sh= is normally used in one of four ways:
      1) Create a link to =verGo.sh=.  The name of the link will be used as the "application" name
@@ -22,7 +22,7 @@
      4) On some platforms (BSDs for example) SHBANG lines require a binary, so you can use =verGo.sh= this way: \\
            =#!/bin/bash /home/richmit/bin/ruby=
 
-** Command Line Options
+* Command Line Options
 
 #+begin_src text
     -noRun ................... Don't actually run the application
@@ -38,7 +38,7 @@
     -debug ................... Enable debugging
 #+end_src
 
-** Exit Codes
+* Exit Codes
 
     - 7 ERROR: Invalid value for ~-prtFmt~
     - 6 ERROR: No application name provided!
@@ -49,12 +49,12 @@
     - 1 ERROR: Application supported, executable found, failed to exec
     - 0 Application found in ~-noRun~ mode
 
-** Recipies
+* Recipies
 
     - To just see if =verGo.sh= knows about an application: Use the =-app= and =-noRun= options.
     - To just print the command binary that would be executed: Use the =-app=, =-noRun=, and =-prtCmd= options.
 
-** Configuration file
+* Configuration file
   
     The default configuration file is ~/.verGoRC.  This may be overridden via the -rcfile option.  
     A simple line oriented format is used with each line looking like: \\
@@ -80,3 +80,10 @@
           - ~"$HOSTNAME" == 'foobar'~
           - ~"$OSTYPE" == 'msys' -a "$MACHTYPE" == 'x86_64'~
           - ~"$TERM" != 'dumb'~
+
+* Emacs
+
+  An Emacs companion package provides access to =verGo.sh= application search capabilities within Emacs.  This provides
+  a uniform way to locate external tools in Emacs dot files in a platform agnostic way.
+
+     https://github.com/richmit/mjr-vergo
