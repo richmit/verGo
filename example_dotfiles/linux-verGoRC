@@ -13,6 +13,8 @@ pqiv === /usr/local/bin/pqiv /usr/bin/pqiv
 display === /usr/local/bin/display /usr/bin/display
 mjrimgview === /usr/bin/nomacs pqiv display xv
 
+nomacs === /usr/bin/nomacs
+
 acroread === /usr/local/bin/acroread /usr/bin/acroread
 
 xpdf === /usr/local/bin/xpdf /opt/local/bin/xpdf /usr/bin/xpdf
@@ -105,3 +107,11 @@ xmaxima === xmaxima-5.40.0 /opt/local/bin/xmaxima /usr/local/bin/xmaxima /usr/bi
 cmake === /usr/local/bin/cmake /opt/local/bin/cmake /usr/bin/cmake
 
 tmux === /usr/local/big/tmux-2.5/bin/tmux /usr/bin/tmux /usr/local/bin/tmux /usr/bin/tmux
+
+JLinkGDBServerCL === '/opt/SEGGER/JLink/JLinkGDBServerCLExe'
+JLinkGDBServer   === '/opt/SEGGER/JLink/JLinkGDBServerExe'
+JLink            === '/opt/SEGGER/JLink/JLinkExe'
+JLinkRTTClient   === '/opt/SEGGER/JLink/JLinkRTTClientExe'
+JLinkSWOViewerCL === '/opt/SEGGER/JLink/JLinkSWOViewerCLExe'
+JLinkRTTViewer   === '/opt/SEGGER/JLink/JLinkRTTViewerExe'
+JLinkSWOViewer   === '/opt/SEGGER/JLink/JLinkSWOViewerExe'

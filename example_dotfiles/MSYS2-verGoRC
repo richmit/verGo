@@ -52,7 +52,8 @@ sqlite3 -w === /ucrt64/bin/sqlite3
 
 gnuplot -w === /ucrt64/bin/gnuplot
 
-julia === '/c/Users/richmit/AppData/Local/Programs/Julia 1.5.2/bin/julia.exe'
+# Run Sys.BINDIR in julia, and it will print the location of the binary...
+julia === '/c/Users/richmit/.julia/juliaup/julia-1.12.6+0.x64.w64.mingw32/bin/julia.exe'
 
 code === '/c/Program Files/Microsoft VS Code/Code.exe' '~/winHome/AppData/Local/Programs/Microsoft VS Code/bin/code'
 vsc === code
@@ -106,6 +107,24 @@ vs === '/c/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/deve
 
 nomacs === '/c/Program Files/nomacs/bin/nomacs.exe'
 
-stm32cubeide -c === /c/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/stm32cubeide.exe
-stm32cubemx -c === '/c//Program Files/STMicroelectronics/STM32Cube/STM32CubeMX/STM32CubeMX.exe'
-stm32cubeprog -c === '/c/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32CubeProgrammer.exe'
+stm32CubeIDE -c === /c/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/stm32cubeide.exe
+STM32CubeMX -c === '/c//Program Files/STMicroelectronics/STM32Cube/STM32CubeMX/STM32CubeMX.exe'
+STM32CubeProgrammer -c === '/c/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32CubeProgrammer.exe'
+STM32_Programmer_CLI -c === '/c/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe'
+
+arm-none-eabi-gdb === /c/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.14.3.rel1.win32_1.0.100.202602081740/tools/bin/arm-none-eabi-gdb.exe
+ST-LINK_gdbserver === /c/ST/STM32CubeIDE_2.0.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.stlink-gdb-server.win32_2.2.400.202601091506/tools/bin/ST-LINK_gdbserver.exe
+
+cube === /c/msys64/home/richmit/.local/stm32cube/bin/cube.exe
+
+ozone === '/c/Program Files/SEGGER/Ozone/Ozone.exe'
+
+JLinkGDBServerCL === '/c/Program Files/SEGGER/JLink_V928/JLinkGDBServerCL.exe'
+JLinkGDBServer   === '/c/Program Files/SEGGER/JLink_V928/JLinkGDBServer.exe'
+JLink            === '/c/Program Files/SEGGER/JLink_V928/JLink.exe'
+JLinkRTTClient   === '/c/Program Files/SEGGER/JLink_V928/JLinkRTTClient.exe'
+JLinkSWOViewerCL === '/c/Program Files/SEGGER/JLink_V928/JLinkSWOViewerCL.exe'
+JLinkRTTViewer   === '/c/Program Files/SEGGER/JLink_V928/JLinkRTTViewer.exe'
+JLinkSWOViewer   === '/c/Program Files/SEGGER/JLink_V928/JLinkSWOViewer.exe'
+
+openocd === /ucrt64/bin/openocd
